@@ -1,0 +1,10 @@
+[package]
+name = "open62541-sys"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.66"
+cmake = "0.1"
