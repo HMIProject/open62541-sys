@@ -9,6 +9,9 @@ fn main() {
     println!("cargo:rerun-if-changed=wrapper.h");
 
     let bindings = bindgen::Builder::default()
+        .allowlist_function("(__)?UA_.*")
+        .allowlist_type("(__)?UA_.*")
+        .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}/include", dst.display()))
         .header("wrapper.h")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
