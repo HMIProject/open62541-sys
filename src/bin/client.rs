@@ -9,7 +9,7 @@ fn main() {
         open62541_sys::UA_ClientConfig_setDefault(open62541_sys::UA_Client_getConfig(client));
         let retval = open62541_sys::UA_Client_connect(
             client,
-            ffi::CString::new("opc.tcp://localhost:4840")
+            ffi::CString::new("opc.tcp://opcua.demo-this.com:51210")
                 .unwrap()
                 .as_bytes_with_nul() as *const _ as *const i8,
         );
@@ -18,31 +18,28 @@ fn main() {
             return;
         }
 
-        let mut value: open62541_sys::UA_Variant = MaybeUninit::zeroed().assume_init();
+        let mut value = MaybeUninit::uninit();
+        open62541_sys::UA_Variant_init(value.as_mut_ptr());
+        let mut value = value.assume_init();
 
-        let node_id = open62541_sys::UA_NodeId {
-            namespaceIndex: 0,
-            identifierType: open62541_sys::UA_NodeIdType_UA_NODEIDTYPE_NUMERIC,
-            identifier: open62541_sys::UA_NodeId__bindgen_ty_1 {
-                numeric: open62541_sys::UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME,
-            },
-        };
-        let _retval = open62541_sys::__UA_Client_readAttribute(
-            client,
-            &node_id,
-            open62541_sys::UA_AttributeId_UA_ATTRIBUTEID_VALUE,
-            &mut value as *mut _ as *mut ffi::c_void,
-            &open62541_sys::UA_TYPES[open62541_sys::UA_TYPES_VARIANT as usize],
+        let node_id = open62541_sys::UA_NODEID_NUMERIC(
+            0,
+            open62541_sys::UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME,
         );
+        let retval = open62541_sys::UA_Client_readValueAttribute(client, node_id, &mut value);
 
-        if retval == open62541_sys::UA_STATUSCODE_GOOD {
-            println!("{value:?}");
+        if retval == open62541_sys::UA_STATUSCODE_GOOD
+            && open62541_sys::UA_Variant_hasScalarType(
+                &value,
+                &open62541_sys::UA_TYPES[open62541_sys::UA_TYPES_DATETIME as usize],
+            )
+        {
+            let raw_date = value.data as *const open62541_sys::UA_DateTime;
+            let dts = open62541_sys::UA_DateTime_toStruct(*raw_date);
+            println!("{dts:?}");
         }
 
-        open62541_sys::UA_clear(
-            &mut value as *mut _ as *mut ffi::c_void,
-            &open62541_sys::UA_TYPES[open62541_sys::UA_TYPES_VARIANT as usize],
-        );
+        open62541_sys::UA_Variant_clear(&mut value);
         open62541_sys::UA_Client_delete(client);
     }
 }
