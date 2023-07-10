@@ -16,6 +16,7 @@ fn main() {
         .allowlist_type("(__)?UA_.*")
         .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}", dst.join("include").display()))
+        .generate_comments(false)
         .header(input.to_string_lossy())
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .wrap_static_fns(true)
