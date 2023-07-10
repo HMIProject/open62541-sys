@@ -9,6 +9,8 @@ fn main() {
         .read_value_attribute(&ll::NodeId::numeric(0, 2258))
         .unwrap();
 
+    let value = value.into_date_time();
+
     println!("{value:?}");
 
     client.disconnect().unwrap();
@@ -65,8 +67,9 @@ pub mod ll {
     use open62541_sys::{
         UA_Client, UA_ClientConfig_setDefault, UA_Client_connect, UA_Client_delete,
         UA_Client_disconnect, UA_Client_getConfig, UA_Client_new, UA_Client_readValueAttribute,
-        UA_NodeId, UA_NodeId_clear, UA_NodeId_init, UA_Variant, UA_Variant_clear, UA_Variant_init,
-        UA_NODEID_NUMERIC, UA_STATUSCODE_GOOD,
+        UA_DataType, UA_DateTime, UA_DateTimeStruct, UA_DateTime_toStruct, UA_NodeId,
+        UA_NodeId_clear, UA_NodeId_init, UA_Variant, UA_Variant_clear, UA_Variant_hasScalarType,
+        UA_Variant_init, UA_NODEID_NUMERIC, UA_STATUSCODE_GOOD,
     };
 
     pub struct Client {
@@ -175,6 +178,29 @@ pub mod ll {
 
             Variant { variant }
         }
+
+        pub fn has_scalar_type(&self, data_type: &DataType) -> bool {
+            unsafe {
+                let has_type = UA_Variant_hasScalarType(&self.variant, data_type.data_type);
+
+                has_type
+            }
+        }
+
+        pub fn into_date_time(self) -> Option<UA_DateTimeStruct> {
+            if self.has_scalar_type(&types::DATE_TIME) {
+                let value = self.variant.data as *const UA_DateTime;
+
+                let value = unsafe {
+                    let value = UA_DateTime_toStruct(*value);
+                    value
+                };
+
+                Some(value)
+            } else {
+                None
+            }
+        }
     }
 
     impl Drop for Variant {
@@ -227,5 +253,21 @@ pub mod ll {
                 UA_NodeId_clear(&mut self.node_id);
             }
         }
+    }
+
+    pub struct DataType {
+        data_type: *const UA_DataType,
+    }
+
+    unsafe impl Sync for DataType {}
+
+    pub mod types {
+        use open62541_sys::{UA_TYPES, UA_TYPES_DATETIME};
+
+        use super::DataType;
+
+        pub static DATE_TIME: DataType = DataType {
+            data_type: unsafe { &UA_TYPES[UA_TYPES_DATETIME as usize] },
+        };
     }
 }
