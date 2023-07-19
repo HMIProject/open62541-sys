@@ -19,13 +19,30 @@ fn main() {
 fn _main_2() {
     use std::ffi;
     use std::mem::MaybeUninit;
+    use std::ptr;
+
+    let remote = std::env::args().skip(1).next().unwrap_or_else(|| {
+        eprintln!("Usage: {} URL", std::env::args().next().unwrap());
+        std::process::exit(1);
+    });
 
     unsafe {
+        println!("Connecting to {remote}…");
         let client = open62541_sys::UA_Client_new();
-        open62541_sys::UA_ClientConfig_setDefault(open62541_sys::UA_Client_getConfig(client));
+        let config = open62541_sys::UA_Client_getConfig(client);
+        open62541_sys::UA_ClientConfig_setDefault(config);
+        unsafe extern "C" fn state_callback(
+            _client: *mut open62541_sys::UA_Client,
+            channel_state: open62541_sys::UA_SecureChannelState,
+            session_state: open62541_sys::UA_SessionState,
+            connect_status: open62541_sys::UA_StatusCode,
+        ) {
+            println!("Client state changed: {channel_state} {session_state} {connect_status}");
+        }
+        (*config).stateCallback = Some(state_callback);
         let retval = open62541_sys::UA_Client_connect(
             client,
-            ffi::CString::new("opc.tcp://opcua.demo-this.com:51210")
+            ffi::CString::new(remote.clone())
                 .unwrap()
                 .as_bytes_with_nul() as *const _ as *const ffi::c_char,
         );
@@ -33,17 +50,17 @@ fn _main_2() {
             open62541_sys::UA_Client_delete(client);
             return;
         }
-
-        let mut value = MaybeUninit::uninit();
-        open62541_sys::UA_Variant_init(value.as_mut_ptr());
-        let mut value = value.assume_init();
+        println!("Connected to {remote}");
 
         let node_id = open62541_sys::UA_NODEID_NUMERIC(
             0,
             open62541_sys::UA_NS0ID_SERVER_SERVERSTATUS_CURRENTTIME,
         );
-        let retval = open62541_sys::UA_Client_readValueAttribute(client, node_id, &mut value);
 
+        let mut value = MaybeUninit::uninit();
+        open62541_sys::UA_Variant_init(value.as_mut_ptr());
+        let mut value = value.assume_init();
+        let retval = open62541_sys::UA_Client_readValueAttribute(client, node_id, &mut value);
         if retval == open62541_sys::UA_STATUSCODE_GOOD
             && open62541_sys::UA_Variant_hasScalarType(
                 &value,
@@ -54,6 +71,109 @@ fn _main_2() {
             let dts = open62541_sys::UA_DateTime_toStruct(*raw_date);
             println!("{dts:?}");
         }
+
+        let mut sub_request = open62541_sys::UA_CreateSubscriptionRequest_default();
+        unsafe extern "C" fn status_callback(
+            _client: *mut open62541_sys::UA_Client,
+            sub_id: open62541_sys::UA_UInt32,
+            _sub_context: *mut ::std::os::raw::c_void,
+            notification: *mut open62541_sys::UA_StatusChangeNotification,
+        ) {
+            println!(
+                "Status of subscription {sub_id} changed: {}",
+                (*notification).status
+            );
+        }
+        unsafe extern "C" fn delete_callback_sub(
+            _client: *mut open62541_sys::UA_Client,
+            sub_id: open62541_sys::UA_UInt32,
+            _sub_context: *mut ::std::os::raw::c_void,
+        ) {
+            println!("Subscription {sub_id} was deleted");
+        }
+        let retval = open62541_sys::UA_Client_Subscriptions_create(
+            client,
+            sub_request,
+            ptr::null_mut(),
+            Some(status_callback),
+            Some(delete_callback_sub),
+        );
+        open62541_sys::UA_CreateSubscriptionRequest_clear(&mut sub_request);
+        if retval.responseHeader.serviceResult != open62541_sys::UA_STATUSCODE_GOOD {
+            open62541_sys::UA_Client_delete(client);
+            return;
+        }
+        let sub_id = retval.subscriptionId;
+        println!("Created subscription with ID {sub_id}");
+
+        let mut mon_request = open62541_sys::UA_MonitoredItemCreateRequest_default(node_id);
+        unsafe extern "C" fn change_callback(
+            _client: *mut open62541_sys::UA_Client,
+            sub_id: open62541_sys::UA_UInt32,
+            _sub_context: *mut ::std::os::raw::c_void,
+            mon_id: open62541_sys::UA_UInt32,
+            _mon_context: *mut ::std::os::raw::c_void,
+            value: *mut open62541_sys::UA_DataValue,
+        ) {
+            print!("Value of monitored item {mon_id} (at subscription {sub_id}) changed: ");
+            let value = (*value).value;
+            if open62541_sys::UA_Variant_hasScalarType(
+                &value,
+                &open62541_sys::UA_TYPES[open62541_sys::UA_TYPES_DATETIME as usize],
+            ) {
+                let raw_date = value.data as *const open62541_sys::UA_DateTime;
+                let dts = open62541_sys::UA_DateTime_toStruct(*raw_date);
+                println!("{dts:?}");
+            }
+        }
+        unsafe extern "C" fn delete_callback_mon(
+            _client: *mut open62541_sys::UA_Client,
+            sub_id: open62541_sys::UA_UInt32,
+            _sub_context: *mut ::std::os::raw::c_void,
+            mon_id: open62541_sys::UA_UInt32,
+            _mon_context: *mut ::std::os::raw::c_void,
+        ) {
+            println!("Monitored item {mon_id} (at subscription {sub_id}) was deleted");
+        }
+        let retval = open62541_sys::UA_Client_MonitoredItems_createDataChange(
+            client,
+            sub_id,
+            open62541_sys::UA_TimestampsToReturn_UA_TIMESTAMPSTORETURN_BOTH,
+            mon_request,
+            ptr::null_mut(),
+            Some(change_callback),
+            Some(delete_callback_mon),
+        );
+        open62541_sys::UA_MonitoredItemCreateRequest_clear(&mut mon_request);
+        if retval.statusCode != open62541_sys::UA_STATUSCODE_GOOD {
+            open62541_sys::UA_Client_delete(client);
+            return;
+        }
+        let mon_id = retval.monitoredItemId;
+        println!("Created monitored item with ID {mon_id} (at subscription {sub_id})");
+
+        loop {
+            let retval = open62541_sys::UA_Client_run_iterate(client, 250);
+            if retval != open62541_sys::UA_STATUSCODE_GOOD {
+                break;
+            }
+        }
+
+        let mut sub_request = MaybeUninit::uninit();
+        open62541_sys::UA_DeleteSubscriptionsRequest_init(sub_request.as_mut_ptr());
+        let mut sub_request = sub_request.assume_init();
+        let mut req_sub_ids = [sub_id];
+        sub_request.subscriptionIds = req_sub_ids.as_mut_ptr();
+        sub_request.subscriptionIdsSize = req_sub_ids.len();
+        let retval = open62541_sys::UA_Client_Subscriptions_delete(client, sub_request);
+        sub_request.subscriptionIdsSize = 0;
+        sub_request.subscriptionIds = ptr::null_mut();
+        open62541_sys::UA_DeleteSubscriptionsRequest_clear(&mut sub_request);
+        if retval.responseHeader.serviceResult != open62541_sys::UA_STATUSCODE_GOOD {
+            open62541_sys::UA_Client_delete(client);
+            return;
+        }
+        println!("Deleted subscription with ID {sub_id}");
 
         open62541_sys::UA_Variant_clear(&mut value);
         open62541_sys::UA_Client_delete(client);
