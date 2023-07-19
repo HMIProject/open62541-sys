@@ -21,31 +21,53 @@ fn _main_2() {
     use std::mem::MaybeUninit;
     use std::ptr;
 
-    let remote = std::env::args().skip(1).next().unwrap_or_else(|| {
-        eprintln!("Usage: {} URL", std::env::args().next().unwrap());
+    let mut args = std::env::args().skip(1);
+    let remote = args.next().unwrap_or_else(|| {
+        eprintln!(
+            "Usage: {} URL [username] [password]",
+            std::env::args().next().unwrap()
+        );
         std::process::exit(1);
     });
+    let username = args.next();
+    let password = args.next();
 
     unsafe {
-        println!("Connecting to {remote}…");
+        let credentials = match (&username, &password) {
+            (Some(username), Some(password)) => format!("username {username}, password {password}"),
+            _ => format!("anonymous"),
+        };
+        println!("Connecting to {remote} ({credentials}) …");
         let client = open62541_sys::UA_Client_new();
         let config = open62541_sys::UA_Client_getConfig(client);
         open62541_sys::UA_ClientConfig_setDefault(config);
         unsafe extern "C" fn state_callback(
             _client: *mut open62541_sys::UA_Client,
-            channel_state: open62541_sys::UA_SecureChannelState,
-            session_state: open62541_sys::UA_SessionState,
-            connect_status: open62541_sys::UA_StatusCode,
+            _channel_state: open62541_sys::UA_SecureChannelState,
+            _session_state: open62541_sys::UA_SessionState,
+            _connect_status: open62541_sys::UA_StatusCode,
         ) {
-            println!("Client state changed: {channel_state} {session_state} {connect_status}");
+            // println!("Client state changed: {channel_state} {session_state} {connect_status}");
         }
         (*config).stateCallback = Some(state_callback);
-        let retval = open62541_sys::UA_Client_connect(
-            client,
-            ffi::CString::new(remote.clone())
-                .unwrap()
-                .as_bytes_with_nul() as *const _ as *const ffi::c_char,
-        );
+        let retval = match (username, password) {
+            (Some(username), Some(password)) => open62541_sys::UA_Client_connectUsername(
+                client,
+                ffi::CString::new(remote.clone())
+                    .unwrap()
+                    .as_bytes_with_nul() as *const _ as *const ffi::c_char,
+                ffi::CString::new(username).unwrap().as_bytes_with_nul() as *const _
+                    as *const ffi::c_char,
+                ffi::CString::new(password).unwrap().as_bytes_with_nul() as *const _
+                    as *const ffi::c_char,
+            ),
+            _ => open62541_sys::UA_Client_connect(
+                client,
+                ffi::CString::new(remote.clone())
+                    .unwrap()
+                    .as_bytes_with_nul() as *const _ as *const ffi::c_char,
+            ),
+        };
         if retval != open62541_sys::UA_STATUSCODE_GOOD {
             open62541_sys::UA_Client_delete(client);
             return;
