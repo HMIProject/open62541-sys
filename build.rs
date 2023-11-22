@@ -18,7 +18,7 @@ fn main() {
         .clang_arg(format!("-I{}", dst.join("include").display()))
         .generate_comments(false)
         .header(input.to_string_lossy())
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .wrap_static_fns(true)
         .generate()
         .expect("Unable to generate bindings");
