@@ -11,4 +11,4 @@
 // statically defined constant as workaround for now.
 //
 // See https://github.com/rust-lang/rust-bindgen/issues/2426
-extern const void *const UA_EMPTY_ARRAY_SENTINEL_ = UA_EMPTY_ARRAY_SENTINEL;
+extern const void *const UA_EMPTY_ARRAY_SENTINEL_;

@@ -1,10 +1,10 @@
+use std::env;
 use std::path::PathBuf;
-use std::{env, process};
 
 fn main() {
     let dst = cmake::build("open62541");
 
-    println!("cargo:rustc-link-search={}/lib", dst.display());
+    println!("cargo:rustc-link-search={}", dst.join("lib").display());
     println!("cargo:rustc-link-lib=open62541");
 
     let input = env::current_dir().unwrap().join("wrapper.h");
@@ -30,50 +30,17 @@ fn main() {
         .expect("Couldn't write bindings!");
 
     let ext_name = "open62541-extern";
-    let exto_path = out_path.join(format!("{ext_name}.o"));
+    let statc_path = env::current_dir().unwrap().join("wrapper.c");
     let extc_path = env::temp_dir().join("bindgen").join("extern.c");
 
-    let clang_output = process::Command::new("cc")
-        .arg("-c")
-        .arg("-O")
-        .arg(format!("-I{}", input.parent().unwrap().display()))
-        .arg(format!("-I{}", dst.join("include").display()))
-        .arg(format!("-o{}", exto_path.display()))
-        .arg(extc_path)
-        .output()
-        .unwrap();
-
-    if !clang_output.status.success() {
-        panic!(
-            "Could not compile object file:\n{}",
-            String::from_utf8_lossy(&clang_output.stderr)
-        );
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    let lib_output = process::Command::new("ar")
-        .arg("rcs")
-        .arg(out_path.join(format!("lib{ext_name}.a")))
-        .arg(exto_path)
-        .output()
-        .unwrap();
-    #[cfg(target_os = "windows")]
-    let lib_output = process::Command::new("LIB")
-        .arg(exto_path)
-        .arg(format!(
-            "/OUT:{}",
-            out_path.join(format!("lib{ext_name}.lib")).display()
-        ))
-        .output()
-        .unwrap();
-
-    if !lib_output.status.success() {
-        panic!(
-            "Could not emit library file:\n{}",
-            String::from_utf8_lossy(&lib_output.stderr)
-        );
-    }
-
-    println!("cargo:rustc-link-search={}", dst.display());
-    println!("cargo:rustc-link-lib=static={}", ext_name);
+    cc::Build::new()
+        .file(extc_path)
+        .file(statc_path)
+        .include(dst.join("include"))
+        .include(input.parent().unwrap())
+        // Disable warnings for `open62541`. Not much we can do anyway.
+        .warnings(false)
+        // Explicitly disable warning (seems to be enabled by default).
+        .flag("-Wno-deprecated")
+        .compile(ext_name);
 }

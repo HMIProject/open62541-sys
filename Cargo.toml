@@ -7,4 +7,5 @@ publish = false
 
 [build-dependencies]
 bindgen = { version = "0.69.1", features = ["experimental"] }
+cc = "1.0.83"
 cmake = "0.1.50"
