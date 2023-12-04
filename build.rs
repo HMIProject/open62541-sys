@@ -59,7 +59,7 @@ fn main() {
         .unwrap();
     #[cfg(target_os = "windows")]
     let lib_output = process::Command::new("LIB")
-        .arg(obj_path)
+        .arg(exto_path)
         .arg(format!(
             "/OUT:{}",
             out_path.join(format!("lib{ext_name}.lib")).display()
