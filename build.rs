@@ -41,6 +41,7 @@ fn main() {
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
         // Explicitly disable warning (seems to be enabled by default).
-        .flag("-Wno-deprecated")
+        .flag_if_supported("-Wno-deprecated-declarations")
+        .flag_if_supported("-Wno-deprecated")
         .compile(ext_name);
 }
