@@ -16,9 +16,12 @@ fn main() {
         .allowlist_type("(__)?UA_.*")
         .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}", dst.join("include").display()))
+        .derive_copy(false)
+        .derive_debug(true)
         .generate_comments(false)
         .header(input.to_string_lossy())
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .use_core()
         .wrap_static_fns(true)
         .generate()
         .expect("Unable to generate bindings");
