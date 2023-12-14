@@ -9,7 +9,7 @@ fn main() {
         .build();
 
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=static=open62541");
+    println!("cargo:rustc-link-lib=open62541");
 
     let input = env::current_dir().unwrap().join("wrapper.h");
 
