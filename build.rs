@@ -2,7 +2,9 @@ use std::{env, path::PathBuf};
 
 fn main() {
     let dst = cmake::Config::new("open62541")
-        // Some systems (Fedora) default to `lib64` instead of `lib` for 64-bit libraries.
+        // Use explicit paths here to avoid generating files where we do not expect them below.
+        .define("CMAKE_INSTALL_INCLUDEDIR", "include")
+        // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", "lib")
         .build();
 
