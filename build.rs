@@ -1,11 +1,19 @@
 use std::env;
 use std::path::PathBuf;
 
-fn main() {
-    let dst = cmake::build("open62541");
+const CMAKE_INSTALL_INCLUDEDIR: &str = "include";
+const CMAKE_INSTALL_LIBDIR: &str = "lib";
 
-    println!("cargo:rustc-link-search={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=open62541");
+fn main() {
+    let build_dir = cmake::Config::new("open62541")
+        .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INSTALL_INCLUDEDIR)
+        .define("CMAKE_INSTALL_LIBDIR", CMAKE_INSTALL_LIBDIR)
+        .build();
+    let include_dir = build_dir.join(CMAKE_INSTALL_INCLUDEDIR);
+    let lib_dir = build_dir.join(CMAKE_INSTALL_LIBDIR);
+
+    println!("cargo:rustc-link-search={}", lib_dir.display());
+    println!("cargo:rustc-link-lib=static=open62541");
 
     let input = env::current_dir().unwrap().join("wrapper.h");
 
@@ -15,7 +23,7 @@ fn main() {
         .allowlist_function("(__)?UA_.*")
         .allowlist_type("(__)?UA_.*")
         .allowlist_var("(__)?UA_.*")
-        .clang_arg(format!("-I{}", dst.join("include").display()))
+        .clang_arg(format!("-I{}", include_dir.display()))
         .derive_copy(false)
         .derive_debug(true)
         .generate_comments(false)
@@ -39,7 +47,7 @@ fn main() {
     cc::Build::new()
         .file(extc_path)
         .file(statc_path)
-        .include(dst.join("include"))
+        .include(include_dir)
         .include(input.parent().unwrap())
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
