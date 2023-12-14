@@ -1,7 +1,10 @@
 use std::{env, path::PathBuf};
 
 fn main() {
-    let dst = cmake::build("open62541");
+    let dst = cmake::Config::new("open62541")
+        // Some systems (Fedora) default to `lib64` instead of `lib` for 64-bit libraries.
+        .define("CMAKE_INSTALL_LIBDIR", "lib")
+        .build();
 
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
     println!("cargo:rustc-link-lib=static=open62541");
