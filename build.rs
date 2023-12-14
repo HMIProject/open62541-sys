@@ -18,6 +18,10 @@ fn main() {
         .allowlist_type("(__)?UA_.*")
         .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}", dst.join("include").display()))
+        .default_enum_style(bindgen::EnumVariation::NewType {
+            is_bitfield: false,
+            is_global: false,
+        })
         // Do not derive `Copy` because most of the data types are not copy-safe (they own memory by
         // pointers and need to be cloned manually to duplicate that memory).
         .derive_copy(false)
