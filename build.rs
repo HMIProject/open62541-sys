@@ -1,5 +1,4 @@
-use std::env;
-use std::path::PathBuf;
+use std::{env, path::PathBuf};
 
 const CMAKE_INSTALL_INCLUDEDIR: &str = "include";
 const CMAKE_INSTALL_LIBDIR: &str = "lib";
@@ -25,20 +24,23 @@ fn main() {
         .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}", include_dir.display()))
         .derive_copy(false)
-        .derive_debug(true)
+        // The auto-derived comments are not particularly useful because they often do not match the
+        // declaration they belong to.
         .generate_comments(false)
         .header(input.to_string_lossy())
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        // We may use `core` instead of `std`. This might be useful for `no_std` environments.
         .use_core()
+        // Wrap static functions. These are used in several places for inline helpers and we want to
+        // preserve those in the generated bindings. This outputs `extern.c` which we compile below.
         .wrap_static_fns(true)
         .generate()
-        .expect("Unable to generate bindings");
+        .expect("should generate `Bindings` instance");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
 
     bindings
         .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+        .expect("should write `bindings.rs`");
 
     let ext_name = "open62541-extern";
     let statc_path = env::current_dir().unwrap().join("wrapper.c");
@@ -51,7 +53,8 @@ fn main() {
         .include(input.parent().unwrap())
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
-        // Explicitly disable warning (seems to be enabled by default).
+        // Explicitly disable deprecation warnings (seem to be enabled even when other warnings have
+        // been disabled above).
         .flag_if_supported("-Wno-deprecated-declarations")
         .flag_if_supported("-Wno-deprecated")
         .compile(ext_name);
