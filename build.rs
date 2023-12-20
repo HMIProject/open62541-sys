@@ -29,6 +29,9 @@ fn main() {
         // Do not derive `Copy` because most of the data types are not copy-safe (they own memory by
         // pointers and need to be cloned manually to duplicate that memory).
         .derive_copy(false)
+        // We want to initialize some types statically. This is used in `open62541`, we require that
+        // as well to mirror some of the functionality.
+        .derive_default(true)
         // The auto-derived comments are not particularly useful because they often do not match the
         // declaration they belong to.
         .generate_comments(false)
