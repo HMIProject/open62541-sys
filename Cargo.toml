@@ -2,6 +2,7 @@
 name = "open62541-sys"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.71.0"
 repository = "https://github.com/HMIProject/open62541-sys.git"
 publish = false
 
