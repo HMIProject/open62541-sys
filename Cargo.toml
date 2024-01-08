@@ -1,6 +1,6 @@
 [package]
 name = "open62541-sys"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 # Keep the MSRV number here in sync with `test.yaml`. We require Rust 1.70, the
 # transitive dependency `home` of `bindgen` depends on it.
