@@ -36,6 +36,9 @@ fn main() {
         // declaration they belong to.
         .generate_comments(false)
         .header(input.to_string_lossy())
+        // Make cargo invalidate the generated bindings whenever any of the files included from the
+        // header change.
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         // We may use `core` instead of `std`. This might be useful for `no_std` environments.
         .use_core()
         // Wrap static functions. These are used in several places for inline helpers and we want to
