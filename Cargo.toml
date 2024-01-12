@@ -13,7 +13,7 @@ homepage = "https://github.com/HMIProject/open62541-sys"
 repository = "https://github.com/HMIProject/open62541-sys.git"
 license = "MPL-2.0"
 keywords = ["opcua", "plc", "automation", "hardware", "protocol"]
-categories = ["external-ffi-bindings", "network-programming", "embedded"]
+categories = ["network-programming", "embedded", "external-ffi-bindings"]
 
 [build-dependencies]
 bindgen = { version = "0.69.1", features = ["experimental"] }
