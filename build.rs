@@ -6,6 +6,10 @@ fn main() {
         .define("CMAKE_INSTALL_INCLUDEDIR", "include")
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", "lib")
+        // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
+        // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
+        // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
+        .env("PYTHONDONTWRITEBYTECODE", "1")
         .build();
 
     println!("cargo:rustc-link-search={}", dst.join("lib").display());
