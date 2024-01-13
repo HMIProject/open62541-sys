@@ -51,6 +51,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Generate Cargo.lock
+        run: cargo generate-lockfile
+
       - name: Cache Rust toolchain and build artifacts
         uses: Swatinem/rust-cache@v2
         with:
