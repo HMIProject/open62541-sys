@@ -10,8 +10,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"
   workflow_dispatch:
 
 concurrency:
@@ -27,14 +25,15 @@ jobs:
   run:
     strategy:
       matrix:
+        runner_os: [windows-latest, ubuntu-latest]
         include:
+          # Add derived attribute `run_doctests`.
+          - run_doctests: true
           - runner_os: windows-latest
             # Doctests fill up disk storage on Windows, and we don't expect much
             # different behavior anyway. It suffices to run them on Linux. Also,
             # Windows runners are 2 times as expensive on GitHub.
             run_doctests: false
-          - runner_os: ubuntu-latest
-            run_doctests: true
 
     runs-on: ${{ matrix.runner_os }}
 
@@ -43,6 +42,10 @@ jobs:
         # Use specific Rust version that is the minimum supported `rust-version`
         # (MSRV) from `Cargo.toml`.
         uses: dtolnay/rust-toolchain@1.70
+
+      - name: Install Cargo helpers
+        run: >-
+          cargo install cargo-hack
 
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
@@ -57,19 +60,24 @@ jobs:
           # The cache should not be shared between different workflows and jobs.
           shared-key: ${{ github.workflow }}-${{ github.job }}
 
-      - name: Build with all features enabled
+      - name: Build with feature combinations
         run: >-
-          cargo build --locked --all-features
+          cargo hack --each-feature build --locked
 
-      - name: Run tests (bins/lib/tests/examples) with all features enabled
+      - name: Run tests (bins/lib/tests/examples) with feature combinations
         run: >-
-          cargo test --locked --all-features
+          cargo hack --each-feature test --locked
           --bins --lib --tests --examples
 
-      # Compile and run doctests, which have been excluded in the previous step(s).
+      # Compile and run doctests, which have been excluded in the previous
+      # step(s).
       #
-      # When cross-compiling the doctests are skipped silently, even with the default
-      # target options that should include them!
+      # Doctests may use any features and there is no easy way to activate
+      # certain features only for some doctests, so we run them without
+      # `cargo-hack`.
+      #
+      # When cross-compiling the doctests are skipped silently, even with the
+      # default target options that should include them!
       #
       # See https://github.com/rust-lang/cargo/issues/7040 for an (unstable)
       # feature flag that should one day allow us to cross-compile doctests.
