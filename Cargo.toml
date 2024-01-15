@@ -14,6 +14,43 @@ repository = "https://github.com/HMIProject/open62541-sys.git"
 license = "MPL-2.0"
 keywords = ["opcua", "plc", "automation", "hardware", "protocol"]
 categories = ["network-programming", "embedded", "external-ffi-bindings"]
+include = [
+    "README.md",
+    "build.rs",
+    "src",
+    "wrapper.c",
+    "wrapper.h",
+    "open62541/CMakeLists.txt",
+    "open62541/LICENSE",
+    "open62541/arch",
+    "open62541/deps",
+    "!open62541/deps/jsmn",
+    "!open62541/deps/mdnsd",
+    "!open62541/deps/mqtt-c",
+    "open62541/doc/CMakeLists.txt",
+    "open62541/doc/conf.py",
+    "open62541/include",
+    "!open62541/include/server*",
+    "!open62541/include/plugin/historydatabase.h",
+    "!open62541/include/plugin/pubsub.h",
+    "open62541/plugins",
+    "!open62541/plugins/historydata",
+    "!open62541/plugins/mqtt",
+    "!open62541/plugins/ua_pubsub_*",
+    "!open62541/plugins/include/plugin/historydata",
+    "!open62541/plugins/include/plugin/pubsub*",
+    "open62541/src",
+    "open62541/tools/certs",
+    "open62541/tools/cmake",
+    "open62541/tools/generate_datatypes.py",
+    "open62541/tools/generate_nodeid_header.py",
+    "open62541/tools/generate_statuscode_descriptions.py",
+    "open62541/tools/nodeset_compiler/*.py",
+    "open62541/tools/nodeset_compiler/*.txt",
+    "open62541/tools/open62541.pc.in",
+    "open62541/tools/packaging/CMakeLists.txt",
+    "open62541/tools/schema",
+]
 
 [build-dependencies]
 bindgen = { version = "0.69.1", features = ["experimental"] }
