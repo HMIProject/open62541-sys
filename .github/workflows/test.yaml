@@ -90,6 +90,6 @@ jobs:
           cargo test --locked --all-features
           --doc
 
-      - name: Build package
+      - name: Build package with all features enabled
         run: >-
           cargo package --locked --all-features
