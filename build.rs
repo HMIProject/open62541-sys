@@ -21,6 +21,8 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .allowlist_function("(__)?UA_.*")
+        // Include `vsnprintf()` from `stdio.h` to simplify formatting of log messages.
+        .allowlist_function("vsnprintf")
         .allowlist_type("(__)?UA_.*")
         .allowlist_var("(__)?UA_.*")
         .clang_arg(format!("-I{}", dst.join("include").display()))
