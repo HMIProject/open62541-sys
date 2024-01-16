@@ -11,6 +11,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Include binding for `vsnprintf()` from `stdio.h` to simplify formatting of log messages.
 
+### Changed
+
+- Breaking: Rename `UA_EMPTY_ARRAY_SENTINEL_` back to `UA_EMPTY_ARRAY_SENTINEL` without trailing
+  underscore.
+
 ## [0.1.3] - 2024-01-12
 
 [0.1.3]: https://github.com/HMIProject/open62541-sys/releases/tag/v0.1.3
