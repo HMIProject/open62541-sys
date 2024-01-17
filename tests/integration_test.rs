@@ -1,7 +1,7 @@
 use core::{ffi, ptr};
 
 use open62541_sys::{
-    va_list_, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel, UA_Logger,
+    va_list_, vsnprintf, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel, UA_Logger,
     UA_LoggerClearCallback_, UA_LoggerLogCallback_,
 };
 
@@ -48,4 +48,12 @@ fn logger_types() {
         context: ptr::null_mut(),
         clear,
     };
+}
+
+#[test]
+fn has_vsnprintf() {
+    // Make sure that `vsnprintf()` is available. On Microsoft Windows we have to provide a wrapper,
+    // to support older versions of the C library (before the introduction of the UCRT/Visual Studio
+    // 2015/Windows 10).
+    let _unused = vsnprintf;
 }
