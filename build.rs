@@ -6,6 +6,9 @@ fn main() {
         .define("CMAKE_INSTALL_INCLUDEDIR", "include")
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", "lib")
+        // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
+        // standard. This also matches the expected (or supported) C standard of `open62541` itself.
+        .define("C_STANDARD", "99")
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
@@ -20,11 +23,18 @@ fn main() {
     println!("cargo:rerun-if-changed={}", input.display());
 
     let bindings = bindgen::Builder::default()
+        // Include our wrapper functions.
+        .allowlist_function("(__)?RS_.*")
         .allowlist_function("(__)?UA_.*")
-        // Include `vsnprintf()` from `stdio.h` to simplify formatting of log messages.
-        .allowlist_function("vsnprintf")
+        // Include our wrapper types.
+        .allowlist_type("(__)?RS_.*")
         .allowlist_type("(__)?UA_.*")
+        // Include our wrapper vars.
+        .allowlist_var("(__)?RS_.*")
         .allowlist_var("(__)?UA_.*")
+        // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
+        // standard. This also matches the expected (or supported) C standard of `open62541` itself.
+        .clang_arg("-std=c99")
         .clang_arg(format!("-I{}", dst.join("include").display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
             is_bitfield: false,
@@ -100,7 +110,13 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {
         // Rename pointer constant back to its original name. See `wrapper.c` for details.
-        (original_item_name == "UA_EMPTY_ARRAY_SENTINEL_")
-            .then(|| "UA_EMPTY_ARRAY_SENTINEL".to_owned())
+        if original_item_name == "RS_EMPTY_ARRAY_SENTINEL" {
+            return Some("UA_EMPTY_ARRAY_SENTINEL".to_owned());
+        }
+        // Rename wrapper function back to its original name. See `wrapper.c` for details.
+        if original_item_name == "RS_vsnprintf" {
+            return Some("vsnprintf".to_owned());
+        }
+        None
     }
 }
