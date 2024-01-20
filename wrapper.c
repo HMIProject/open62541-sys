@@ -2,21 +2,32 @@
 
 // Wrapper for `vsnprintf()` with normalized behavior across different platforms
 // such as Microsoft Windows.
+//
+// Other than the standard `vsnprintf()`, this function does not consume the passed
+// `va_list` argument! The caller is responsible for calling `va_end()` on the
+// `va_list` argument eventually.
 #if defined(_MSC_VER) && _MSC_VER < 1900
 int RS_vsnprintf(
     char *buffer,
     size_t count,
     const char *format,
-    va_list argptr)
+    va_list args)
 {
   // Microsoft does not (always) define a standard-conforming `vsnprintf()`. But
   // it does define a variant with slightly different behavior. We normalize the
   // differences as best we can.
   int result = -1;
-  if (count)
-    result = _vsnprintf_s(buffer, count, _TRUNCATE, format, argptr);
-  if (result < 0)
-    result = _vscprintf(format, argptr);
+  if (count) {
+    va_list args_copied;
+    va_copy(args_copied, args);
+    result = _vsnprintf_s(buffer, count, _TRUNCATE, format, args_copied);
+  }
+  if (result < 0) {
+    va_list args_copied;
+    va_copy(args_copied, args);
+    result = _vscprintf(format, args_copied);
+  }
+
   return result;
 }
 #else
@@ -24,13 +35,22 @@ int RS_vsnprintf(
     char *buffer,
     size_t count,
     const char *format,
-    va_list argptr)
+    va_list args)
 {
   // Forward to existing standards-compliant function. It may have be defined as
   // a macro, so we need a wrapper function for bindgen to pick it up anyway.
-  return vsnprintf(buffer, count, format, argptr);
+  va_list args_copied;
+  va_copy(args_copied, args);
+  int result = vsnprintf(buffer, count, format, args_copied);
+
+  return result;
 }
 #endif
+
+void RS_va_end(va_list args)
+{
+  va_end(args);
+}
 
 // bindgen does not support non-trivial `#define` used for pointer constant. Use
 // statically defined constant as workaround for now.

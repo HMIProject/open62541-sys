@@ -1,8 +1,8 @@
 use core::{ffi, ptr};
 
 use open62541_sys::{
-    va_list_, vsnprintf, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel, UA_Logger,
-    UA_LoggerClearCallback_, UA_LoggerLogCallback_,
+    va_end, va_list_, vsnprintf, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel,
+    UA_Logger, UA_LoggerClearCallback_, UA_LoggerLogCallback_,
 };
 
 #[test]
@@ -56,4 +56,10 @@ fn has_vsnprintf() {
     // to support older versions of the C library (before the introduction of the UCRT/Visual Studio
     // 2015/Windows 10).
     let _unused = vsnprintf;
+}
+
+#[test]
+fn has_va_end() {
+    // Make sure that `va_end()` is available.
+    let _unused = va_end;
 }
