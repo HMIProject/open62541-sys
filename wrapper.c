@@ -4,10 +4,10 @@
 // such as Microsoft Windows.
 //
 // Other than the standard `vsnprintf()`, this function does not consume the passed
-// `va_list` argument! The caller is responsible for calling `va_end()` on the
+// `va_list` argument! The caller is responsible for calling `vsnprintf_va_end()` on the
 // `va_list` argument eventually.
 #if defined(_MSC_VER) && _MSC_VER < 1900
-int RS_vsnprintf(
+int vsnprintf_va_copy(
     char *buffer,
     size_t count,
     const char *format,
@@ -31,7 +31,7 @@ int RS_vsnprintf(
   return result;
 }
 #else
-int RS_vsnprintf(
+int vsnprintf_va_copy(
     char *buffer,
     size_t count,
     const char *format,
@@ -47,7 +47,7 @@ int RS_vsnprintf(
 }
 #endif
 
-void RS_va_end(va_list args)
+void vsnprintf_va_end(va_list args)
 {
   va_end(args);
 }

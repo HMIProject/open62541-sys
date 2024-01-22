@@ -113,13 +113,6 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
         if original_item_name == "RS_EMPTY_ARRAY_SENTINEL" {
             return Some("UA_EMPTY_ARRAY_SENTINEL".to_owned());
         }
-        // Rename wrapper function back to its original name. See `wrapper.c` for details.
-        if original_item_name == "RS_vsnprintf" {
-            return Some("vsnprintf".to_owned());
-        }
-        if original_item_name == "RS_va_end" {
-            return Some("va_end".to_owned());
-        }
         None
     }
 }
