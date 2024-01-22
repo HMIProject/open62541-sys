@@ -117,6 +117,9 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
         if original_item_name == "RS_vsnprintf" {
             return Some("vsnprintf".to_owned());
         }
+        if original_item_name == "RS_va_end" {
+            return Some("va_end".to_owned());
+        }
         None
     }
 }

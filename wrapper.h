@@ -8,8 +8,9 @@
 #include <open62541/plugin/log_stdout.h>
 #include <open62541/types.h>
 
-// Include with binding of `vsnprintf()` to simplify formatting of log messages.
+// Include with binding of `vsnprintf()` and `va_list` functions to simplify formatting of log messages.
 #include <stdio.h>
+#include <stdarg.h>
 
 // bindgen does not support non-trivial `#define` used for pointer constant. Use
 // statically defined constant as workaround for now.
@@ -19,8 +20,13 @@ extern const void *const RS_EMPTY_ARRAY_SENTINEL;
 
 // Wrapper for `vsnprintf()` with normalized behavior across different platforms
 // such as Microsoft Windows.
+//
+// Other than the standard `vsnprintf()`, this implementation copies the `va_list`
+// argument before passing it along to allow repeated calls.
 int RS_vsnprintf(
     char *buffer,
     size_t count,
     const char *format,
-    va_list argptr);
+    va_list args);
+
+void RS_va_end(va_list args);
