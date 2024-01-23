@@ -109,9 +109,9 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
     }
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {
-        // Rename pointer constant back to its original name. See `wrapper.c` for details.
-        if original_item_name == "RS_EMPTY_ARRAY_SENTINEL" {
-            return Some("UA_EMPTY_ARRAY_SENTINEL".to_owned());
+        // Rename our wrapped custom exports to their intended names.
+        if let Some(name) = original_item_name.strip_prefix("RS_") {
+            return Some(name.to_owned());
         }
         None
     }
