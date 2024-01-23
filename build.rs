@@ -110,9 +110,6 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {
         // Rename our wrapped custom exports to their intended names.
-        if let Some(name) = original_item_name.strip_prefix("RS_") {
-            return Some(name.to_owned());
-        }
-        None
+        original_item_name.strip_prefix("RS_").map(str::to_owned)
     }
 }
