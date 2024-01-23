@@ -22,11 +22,13 @@ extern const void *const RS_EMPTY_ARRAY_SENTINEL;
 // such as Microsoft Windows.
 //
 // Other than the standard `vsnprintf()`, this implementation copies the `va_list`
-// argument before passing it along to allow repeated calls.
-int RS_vsnprintf(
+// argument before passing it along to allow repeated calls. The caller is responsible
+// to invoke `vsnprintf_va_end()` on the `va_list` argument eventually.
+int vsnprintf_va_copy(
     char *buffer,
     size_t count,
     const char *format,
     va_list args);
 
-void RS_va_end(va_list args);
+// Wrapper for `va_end()` that is supposed to be used with `vsnprintf_va_copy()`.
+void vsnprintf_va_end(va_list args);
