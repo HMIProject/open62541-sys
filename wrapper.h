@@ -17,7 +17,7 @@
 // statically defined constant as workaround for now.
 //
 // See https://github.com/rust-lang/rust-bindgen/issues/2426
-extern const void *const RS_EMPTY_ARRAY_SENTINEL;
+extern const void *const RS_UA_EMPTY_ARRAY_SENTINEL;
 
 // Wrapper for `vsnprintf()` with normalized behavior across different platforms
 // such as Microsoft Windows.

@@ -1,8 +1,8 @@
 use core::{ffi, ptr};
 
 use open62541_sys::{
-    va_list_, vsnprintf_va_copy, vsnprintf_va_end, UA_Client_delete, UA_Client_new, UA_LogCategory,
-    UA_LogLevel, UA_Logger, UA_LoggerClearCallback_, UA_LoggerLogCallback_,
+    va_list_, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel, UA_Logger,
+    UA_LoggerClearCallback_, UA_LoggerLogCallback_,
 };
 
 #[test]
@@ -51,13 +51,13 @@ fn logger_types() {
 }
 
 #[test]
-fn has_vsnprintf_va_copy() {
-    // Make sure that `vsnprintf_va_copy()` is available.
-    let _unused = vsnprintf_va_copy;
-}
+fn has_custom_exports() {
+    // Make sure that our custom exports (prefixed internally with `RS_`) are available under their
+    // expected names.
+    //
+    use open62541_sys::{vsnprintf_va_copy, vsnprintf_va_end, UA_EMPTY_ARRAY_SENTINEL};
 
-#[test]
-fn has_vsnprintf_va_end() {
-    // Make sure that `vsnprintf_va_end()` is available.
+    let _unused = vsnprintf_va_copy;
     let _unused = vsnprintf_va_end;
+    let _unused = unsafe { UA_EMPTY_ARRAY_SENTINEL };
 }
