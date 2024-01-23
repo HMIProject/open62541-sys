@@ -3,11 +3,11 @@
 // Wrapper for `vsnprintf()` with normalized behavior across different platforms
 // such as Microsoft Windows.
 //
-// Other than the standard `vsnprintf()`, this function does not consume the passed
-// `va_list` argument! The caller is responsible for calling `vsnprintf_va_end()` on the
-// `va_list` argument eventually.
+// Other than the standard `vsnprintf()`, this function does not consume the
+// passed `va_list` argument! The caller is responsible for calling
+// `vsnprintf_va_end()` on the `va_list` argument eventually.
 #if defined(_MSC_VER) && _MSC_VER < 1900
-int vsnprintf_va_copy(
+int RS_vsnprintf_va_copy(
     char *buffer,
     size_t count,
     const char *format,
@@ -17,12 +17,14 @@ int vsnprintf_va_copy(
   // it does define a variant with slightly different behavior. We normalize the
   // differences as best we can.
   int result = -1;
-  if (count) {
+  if (count)
+  {
     va_list args_copied;
     va_copy(args_copied, args);
     result = _vsnprintf_s(buffer, count, _TRUNCATE, format, args_copied);
   }
-  if (result < 0) {
+  if (result < 0)
+  {
     va_list args_copied;
     va_copy(args_copied, args);
     result = _vscprintf(format, args_copied);
@@ -31,7 +33,7 @@ int vsnprintf_va_copy(
   return result;
 }
 #else
-int vsnprintf_va_copy(
+int RS_vsnprintf_va_copy(
     char *buffer,
     size_t count,
     const char *format,
@@ -47,7 +49,7 @@ int vsnprintf_va_copy(
 }
 #endif
 
-void vsnprintf_va_end(va_list args)
+void RS_vsnprintf_va_end(va_list args)
 {
   va_end(args);
 }
