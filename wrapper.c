@@ -58,4 +58,4 @@ void RS_vsnprintf_va_end(va_list args)
 // statically defined constant as workaround for now.
 //
 // See https://github.com/rust-lang/rust-bindgen/issues/2426
-const void *const RS_EMPTY_ARRAY_SENTINEL = UA_EMPTY_ARRAY_SENTINEL;
+const void *const RS_UA_EMPTY_ARRAY_SENTINEL = UA_EMPTY_ARRAY_SENTINEL;
