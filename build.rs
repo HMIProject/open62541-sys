@@ -5,14 +5,17 @@ use std::{
 
 fn main() {
     let src = env::current_dir().unwrap();
+    let src_open62541 = src.join("open62541");
+    let src_wrapper_c = src.join("wrapper.c");
+    let src_wrapper_h = src.join("wrapper.h");
 
-    // Rebuild when any of the files in the source directory changes.
-    println!("cargo:rerun-if-changed={}", src.join("open62541").display());
-    println!("cargo:rerun-if-changed={}", src.join("wrapper.c").display());
-    println!("cargo:rerun-if-changed={}", src.join("wrapper.h").display());
+    // Rebuild when files in the source directory change.
+    println!("cargo:rerun-if-changed={}", src_open62541.display());
+    println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
+    println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
 
     // Build bundled copy of `open62541` with CMake.
-    let dst = cmake::Config::new(src.join("open62541"))
+    let dst = cmake::Config::new(src_open62541)
         // Use explicit paths here to avoid generating files where we do not expect them below.
         .define("CMAKE_INSTALL_INCLUDEDIR", "include")
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
@@ -58,7 +61,7 @@ fn main() {
         // The auto-derived comments are not particularly useful because they often do not match the
         // declaration they belong to.
         .generate_comments(false)
-        .header(src.join("wrapper.h").to_str().unwrap())
+        .header(src_wrapper_h.to_str().unwrap())
         // Activate parse callbacks. This causes cargo to invalidate the generated bindings when any
         // of the included files change. It also enables us to rename items in the final bindings.
         .parse_callbacks(Box::new(CustomCallbacks { dst: dst.clone() }))
@@ -77,7 +80,7 @@ fn main() {
         .expect("should write `bindings.rs`");
 
     let ext_name = "open62541-extern";
-    let statc_path = src.join("wrapper.c");
+    let statc_path = src_wrapper_c;
     let extc_path = env::temp_dir().join("bindgen").join("extern.c");
 
     cc::Build::new()
