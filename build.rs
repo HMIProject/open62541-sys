@@ -3,13 +3,21 @@ use std::{
     path::{Path, PathBuf},
 };
 
+/// Target path in CMake build for include files.
+const CMAKE_INCLUDE: &str = "include";
+
+/// Target path in CMake build for lib files.
+const CMAKE_LIB: &str = "lib";
+
 fn main() {
     let src = env::current_dir().unwrap();
+
+    // Get derived paths relative to `src`.
     let src_open62541 = src.join("open62541");
     let src_wrapper_c = src.join("wrapper.c");
     let src_wrapper_h = src.join("wrapper.h");
 
-    // Rebuild when files in the source directory change.
+    // Rerun build when files in `src` change.
     println!("cargo:rerun-if-changed={}", src_open62541.display());
     println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
     println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
@@ -17,9 +25,9 @@ fn main() {
     // Build bundled copy of `open62541` with CMake.
     let dst = cmake::Config::new(src_open62541)
         // Use explicit paths here to avoid generating files where we do not expect them below.
-        .define("CMAKE_INSTALL_INCLUDEDIR", "include")
+        .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
-        .define("CMAKE_INSTALL_LIBDIR", "lib")
+        .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "99")
@@ -29,7 +37,11 @@ fn main() {
         .env("PYTHONDONTWRITEBYTECODE", "1")
         .build();
 
-    println!("cargo:rustc-link-search={}", dst.join("lib").display());
+    // Get derived paths relative to `dst`.
+    let dst_include = dst.join(CMAKE_INCLUDE);
+    let dst_lib = dst.join(CMAKE_LIB);
+
+    println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib=open62541");
 
     let bindings = bindgen::Builder::default()
@@ -45,7 +57,7 @@ fn main() {
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .clang_arg("-std=c99")
-        .clang_arg(format!("-I{}", dst.join("include").display()))
+        .clang_arg(format!("-I{}", dst_include.display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
             is_bitfield: false,
             is_global: false,
@@ -86,7 +98,7 @@ fn main() {
     cc::Build::new()
         .file(extc_path)
         .file(statc_path)
-        .include(dst.join("include"))
+        .include(dst_include)
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
         // Explicitly disable deprecation warnings (seem to be enabled even when other warnings have
