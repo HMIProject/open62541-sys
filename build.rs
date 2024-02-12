@@ -1,11 +1,40 @@
-use std::{env, path::PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
+
+/// Target path in CMake build for include files.
+const CMAKE_INCLUDE: &str = "include";
+/// Target path in CMake build for lib files.
+const CMAKE_LIB: &str = "lib";
+
+/// Name of target library from `open62541` build. This must be `open62541` as it is being generated
+/// by the CMake build.
+const LIB_BASE: &str = "open62541";
+/// Name of library from `extern.c` and `wrapper.c` that holds additional helpers, in particular the
+/// compilation of static (inline) functions from `open62541` itself. This may be an arbitrary name;
+/// the `cc` build adds it as `rustc-link-lib` automatically.
+const LIB_EXT: &str = "open62541-ext";
 
 fn main() {
-    let dst = cmake::Config::new("open62541")
+    let src = env::current_dir().unwrap();
+
+    // Get derived paths relative to `src`.
+    let src_open62541 = src.join("open62541");
+    let src_wrapper_c = src.join("wrapper.c");
+    let src_wrapper_h = src.join("wrapper.h");
+
+    // Rerun build when files in `src` change.
+    println!("cargo:rerun-if-changed={}", src_open62541.display());
+    println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
+    println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
+
+    // Build bundled copy of `open62541` with CMake.
+    let dst = cmake::Config::new(src_open62541)
         // Use explicit paths here to avoid generating files where we do not expect them below.
-        .define("CMAKE_INSTALL_INCLUDEDIR", "include")
+        .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
-        .define("CMAKE_INSTALL_LIBDIR", "lib")
+        .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "99")
@@ -15,12 +44,18 @@ fn main() {
         .env("PYTHONDONTWRITEBYTECODE", "1")
         .build();
 
-    println!("cargo:rustc-link-search={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=open62541");
+    // Get derived paths relative to `dst`.
+    let dst_include = dst.join(CMAKE_INCLUDE);
+    let dst_lib = dst.join(CMAKE_LIB);
 
-    let input = env::current_dir().unwrap().join("wrapper.h");
+    println!("cargo:rustc-link-search={}", dst_lib.display());
+    println!("cargo:rustc-link-lib={}", LIB_BASE);
 
-    println!("cargo:rerun-if-changed={}", input.display());
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    // Get derived paths relative to `out`.
+    let out_bindings_rs = out.join("bindings.rs");
+    let out_extern_c = out.join("extern.c");
 
     let bindings = bindgen::Builder::default()
         // Include our wrapper functions.
@@ -35,7 +70,7 @@ fn main() {
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .clang_arg("-std=c99")
-        .clang_arg(format!("-I{}", dst.join("include").display()))
+        .clang_arg(format!("-I{}", dst_include.display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
             is_bitfield: false,
             is_global: false,
@@ -51,56 +86,72 @@ fn main() {
         // The auto-derived comments are not particularly useful because they often do not match the
         // declaration they belong to.
         .generate_comments(false)
-        .header(input.to_string_lossy())
+        .header(src_wrapper_h.to_str().unwrap())
         // Activate parse callbacks. This causes cargo to invalidate the generated bindings when any
         // of the included files change. It also enables us to rename items in the final bindings.
-        .parse_callbacks(Box::new(CustomCallbacks))
+        .parse_callbacks(Box::new(CustomCallbacks { dst }))
         // We may use `core` instead of `std`. This might be useful for `no_std` environments.
         .use_core()
         // Wrap static functions. These are used in several places for inline helpers and we want to
         // preserve those in the generated bindings. This outputs `extern.c` which we compile below.
         .wrap_static_fns(true)
+        // Make sure to specify the location of the resulting `extern.c`. By default `bindgen` would
+        // place it in the temporary directory.
+        .wrap_static_fns_path(out_extern_c.to_str().unwrap())
         .generate()
         .expect("should generate `Bindings` instance");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(out_bindings_rs)
         .expect("should write `bindings.rs`");
 
-    let ext_name = "open62541-extern";
-    let statc_path = env::current_dir().unwrap().join("wrapper.c");
-    let extc_path = env::temp_dir().join("bindgen").join("extern.c");
-
+    // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
+    // link in addition to the base `open62541` library.
     cc::Build::new()
-        .file(extc_path)
-        .file(statc_path)
-        .include(dst.join("include"))
-        .include(input.parent().unwrap())
+        .file(out_extern_c)
+        .file(src_wrapper_c)
+        .include(dst_include)
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
         // Explicitly disable deprecation warnings (seem to be enabled even when other warnings have
         // been disabled above).
         .flag_if_supported("-Wno-deprecated-declarations")
         .flag_if_supported("-Wno-deprecated")
-        .compile(ext_name);
+        .compile(LIB_EXT);
 }
 
 #[derive(Debug)]
-struct CustomCallbacks;
+struct CustomCallbacks {
+    /// Destination of CMake build of `open62541`.
+    dst: PathBuf,
+}
+
+impl CustomCallbacks {
+    /// Checks if `filename` is inside CMake destination.
+    ///
+    /// This may be used to ensure that we do not run a rebuild when files generated by CMake change
+    /// (it is not necessary to include those files because we already watch the CMake _sources_ and
+    /// trigger a rebuild when they change).
+    fn inside_dst(&self, filename: &str) -> bool {
+        Path::new(filename).starts_with(&self.dst)
+    }
+}
 
 // Include `cargo:rerun-if` instructions just like `bindgen::CargoCallbacks` does. In addition, make
 // necessary adjustments to the names of items for the final bindings.
 impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
     fn header_file(&self, filename: &str) {
-        // Make sure to rerun build when header file changes.
-        println!("cargo:rerun-if-changed={}", filename);
+        // Make sure to rerun build when dependency outside of `dst/` changes.
+        if !self.inside_dst(filename) {
+            println!("cargo:rerun-if-changed={}", filename);
+        }
     }
 
     fn include_file(&self, filename: &str) {
-        // Make sure to rerun build when include file changes.
-        println!("cargo:rerun-if-changed={}", filename);
+        // Make sure to rerun build when dependency outside of `dst/` changes.
+        if !self.inside_dst(filename) {
+            println!("cargo:rerun-if-changed={}", filename);
+        }
     }
 
     fn read_env_var(&self, key: &str) {
