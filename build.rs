@@ -76,7 +76,7 @@ fn main() {
         .header(src_wrapper_h.to_str().unwrap())
         // Activate parse callbacks. This causes cargo to invalidate the generated bindings when any
         // of the included files change. It also enables us to rename items in the final bindings.
-        .parse_callbacks(Box::new(CustomCallbacks { dst: dst.clone() }))
+        .parse_callbacks(Box::new(CustomCallbacks { dst }))
         // We may use `core` instead of `std`. This might be useful for `no_std` environments.
         .use_core()
         // Wrap static functions. These are used in several places for inline helpers and we want to
