@@ -5,9 +5,16 @@ use std::{
 
 /// Target path in CMake build for include files.
 const CMAKE_INCLUDE: &str = "include";
-
 /// Target path in CMake build for lib files.
 const CMAKE_LIB: &str = "lib";
+
+/// Name of target library from `open62541` build. This must be `open62541` as it is being generated
+/// by the CMake build.
+const LIB_BASE: &str = "open62541";
+/// Name of library from `extern.c` and `wrapper.c` that holds additional helpers, in particular the
+/// compilation of static (inline) functions from `open62541` itself. This may be an arbitrary name;
+/// the `cc` build adds it as `rustc-link-lib` automatically.
+const LIB_EXT: &str = "open62541-ext";
 
 fn main() {
     let src = env::current_dir().unwrap();
@@ -42,7 +49,13 @@ fn main() {
     let dst_lib = dst.join(CMAKE_LIB);
 
     println!("cargo:rustc-link-search={}", dst_lib.display());
-    println!("cargo:rustc-link-lib=open62541");
+    println!("cargo:rustc-link-lib={}", LIB_BASE);
+
+    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+
+    // Get derived paths relative to `out`.
+    let out_bindings_rs = out.join("bindings.rs");
+    let out_extern_c = out.join("extern.c");
 
     let bindings = bindgen::Builder::default()
         // Include our wrapper functions.
@@ -82,22 +95,21 @@ fn main() {
         // Wrap static functions. These are used in several places for inline helpers and we want to
         // preserve those in the generated bindings. This outputs `extern.c` which we compile below.
         .wrap_static_fns(true)
+        // Make sure to specify the location of the resulting `extern.c`. By default `bindgen` would
+        // place it in the temporary directory.
+        .wrap_static_fns_path(out_extern_c.to_str().unwrap())
         .generate()
         .expect("should generate `Bindings` instance");
 
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file(out_bindings_rs)
         .expect("should write `bindings.rs`");
 
-    let ext_name = "open62541-extern";
-    let statc_path = src_wrapper_c;
-    let extc_path = env::temp_dir().join("bindgen").join("extern.c");
-
+    // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
+    // link in addition to the base `open62541` library.
     cc::Build::new()
-        .file(extc_path)
-        .file(statc_path)
+        .file(out_extern_c)
+        .file(src_wrapper_c)
         .include(dst_include)
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
@@ -105,7 +117,7 @@ fn main() {
         // been disabled above).
         .flag_if_supported("-Wno-deprecated-declarations")
         .flag_if_supported("-Wno-deprecated")
-        .compile(ext_name);
+        .compile(LIB_EXT);
 }
 
 #[derive(Debug)]
