@@ -29,8 +29,8 @@ include = [
     "!open62541/deps/mdnsd/",
     "!open62541/deps/mqtt-c/",
     "!open62541/deps/nodesetLoader/",
-    # We do not include the OPC UA NodeSets. They are useful when implementating
-    # OPC UA servers: the `nodeset_compiler` tool uses the definitions to derive
+    # We do not include OPC UA NodeSets. They are required when implementing OPC
+    # UA servers: the `nodeset_compiler` tool uses these definitions to generate
     # custom C and header files that can be used in a server implementation. See
     # `open62541/doc/nodeset_compiler.rst` for details.
     "!open62541/deps/ua-nodeset/",
