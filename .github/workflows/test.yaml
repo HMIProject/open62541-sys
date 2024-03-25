@@ -37,21 +37,9 @@ jobs:
             runner_os: ubuntu-latest
             default_target: false
             runnable: false
-          - target: i686-pc-windows-gnu
-            runner_os: windows-latest
-            default_target: false
-            runnable: true
-          - target: i686-pc-windows-msvc
-            runner_os: windows-latest
-            default_target: false
-            runnable: true
           - target: x86_64-apple-darwin
             runner_os: macos-latest
             default_target: true
-            runnable: true
-          - target: x86_64-pc-windows-gnu
-            runner_os: windows-latest
-            default_target: false
             runnable: true
           - target: x86_64-pc-windows-msvc
             runner_os: windows-latest
