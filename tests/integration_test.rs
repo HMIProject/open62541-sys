@@ -40,7 +40,7 @@ fn logger_types() {
         _args: va_list_,
     ) {
     }
-    unsafe extern "C" fn clear_c(_context: *mut ffi::c_void) {}
+    unsafe extern "C" fn clear_c(_logger: *mut UA_Logger) {}
     let log: UA_LoggerLogCallback_ = Some(log_c);
     let clear: UA_LoggerClearCallback_ = Some(clear_c);
     let _logger = UA_Logger {

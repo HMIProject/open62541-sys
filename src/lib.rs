@@ -31,4 +31,4 @@ pub type UA_LoggerLogCallback_ = Option<
 >;
 
 /// Callback type used for [`UA_Logger::clear`].
-pub type UA_LoggerClearCallback_ = Option<unsafe extern "C" fn(context: *mut ffi::c_void)>;
+pub type UA_LoggerClearCallback_ = Option<unsafe extern "C" fn(logger: *mut UA_Logger)>;
