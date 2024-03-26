@@ -48,6 +48,12 @@ fn main() {
     let dst_include = dst.join(CMAKE_INCLUDE);
     let dst_lib = dst.join(CMAKE_LIB);
 
+    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "windows") {
+        // We require the `Iphlpapi` library on Windows builds to avoid errors (regarding the use of
+        // `if_nametoindex`, see https://github.com/open62541/open62541/issues/5622).
+        println!("cargo:rustc-link-lib=Iphlpapi");
+    }
+
     println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib={}", LIB_BASE);
 
@@ -57,7 +63,7 @@ fn main() {
     let out_bindings_rs = out.join("bindings.rs");
     let out_extern_c = out.join("extern.c");
 
-    let bindings = bindgen::Builder::default()
+    let builder = bindgen::Builder::default()
         // Include our wrapper functions.
         .allowlist_function("(__)?RS_.*")
         .allowlist_function("(__)?UA_.*")
@@ -97,7 +103,9 @@ fn main() {
         .wrap_static_fns(true)
         // Make sure to specify the location of the resulting `extern.c`. By default `bindgen` would
         // place it in the temporary directory.
-        .wrap_static_fns_path(out_extern_c.to_str().unwrap())
+        .wrap_static_fns_path(out_extern_c.to_str().unwrap());
+
+    let bindings = builder
         .generate()
         .expect("should generate `Bindings` instance");
 

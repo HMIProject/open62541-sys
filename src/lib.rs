@@ -1,6 +1,7 @@
 // Disable several lints. The auto-generated bindings do not conform to them.
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::transmute_int_to_bool)]
+#![allow(clippy::type_complexity)]
 #![allow(clippy::useless_transmute)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
@@ -30,4 +31,4 @@ pub type UA_LoggerLogCallback_ = Option<
 >;
 
 /// Callback type used for [`UA_Logger::clear`].
-pub type UA_LoggerClearCallback_ = Option<unsafe extern "C" fn(context: *mut ffi::c_void)>;
+pub type UA_LoggerClearCallback_ = Option<unsafe extern "C" fn(logger: *mut UA_Logger)>;
