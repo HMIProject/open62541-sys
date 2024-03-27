@@ -30,7 +30,8 @@ fn main() {
     println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
 
     // Build bundled copy of `open62541` with CMake.
-    let dst = cmake::Config::new(src_open62541)
+    let mut cmake = cmake::Config::new(src_open62541);
+    cmake
         // Use explicit paths here to avoid generating files where we do not expect them below.
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
@@ -41,8 +42,19 @@ fn main() {
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
-        .env("PYTHONDONTWRITEBYTECODE", "1")
-        .build();
+        .env("PYTHONDONTWRITEBYTECODE", "1");
+
+    if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+        let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+        // We require includes from the Linux headers which are not provided automatically when musl
+        // is targeted (see https://github.com/open62541/open62541/issues/6360).
+        // TODO: Remove this when `open62541` enables us to build without including Linux headers.
+        cmake
+            .cflag("-idirafter/usr/include")
+            .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
+    }
+
+    let dst = cmake.build();
 
     // Get derived paths relative to `dst`.
     let dst_include = dst.join(CMAKE_INCLUDE);
