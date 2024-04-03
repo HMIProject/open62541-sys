@@ -11,7 +11,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Add work-around for re-enabling builds for [musl libc](https://www.musl-libc.org) environment.
+- Add work-around to re-enable builds for [musl libc](https://www.musl-libc.org) environment.
 
 ## [0.4.0-pre.1] - 2024-03-26
 
