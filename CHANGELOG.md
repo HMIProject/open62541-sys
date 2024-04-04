@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0-pre.3] - 2024-04-04
+
+[0.4.0-pre.3]: https://github.com/HMIProject/open62541-sys/compare/v0.4.0-pre.2...v0.4.0-pre.3
+
+### Changed
+
+- Upgrade to latest
+  [commit](https://github.com/open62541/open62541/commit/43ea708216e0460d9d50348a140a952cca34fe81)
+  from open62541 version 1.4.
+
 ## [0.4.0-pre.2] - 2024-03-27
 
 [0.4.0-pre.2]: https://github.com/HMIProject/open62541-sys/compare/v0.4.0-pre.1...v0.4.0-pre.2
