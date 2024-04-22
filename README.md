@@ -10,9 +10,18 @@ This crate provides low-level, unsafe bindings for the C99 library
 [open62541](https://www.open62541.org), an open source and free implementation of
 [OPC UA](https://opcfoundation.org/about/opc-technologies/opc-ua/).
 
+## Overview
+
+Use this crate when you want to implement your own safe Rust abstractions over the unsafe C API
+provided by open62541.
+
+If you are looking for safe Rust bindings that can be used directly, see crate `open62541`
+([crates.io](https://crates.io/crates/open62541),
+[GitHub](https://github.com/HMIProject/open62541)).
+
 ## Development
 
-Make sure to check out `open62541` with submodules:
+Make sure to check out the repository `open62541-sys` with submodules:
 
 ```shell
 git submodule update --init --recursive

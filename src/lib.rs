@@ -1,3 +1,9 @@
+//! Bindings for the [open62541](https://www.open62541.org) library.
+//!
+//! If you are looking for safe Rust bindings that can be used directly, see crate [`open62541`].
+//!
+//! [`open62541`]: https://crates.io/crates/open62541
+
 // Disable several lints. The auto-generated bindings do not conform to them.
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::transmute_int_to_bool)]
