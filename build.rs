@@ -67,7 +67,7 @@ fn main() {
     }
 
     println!("cargo:rustc-link-search={}", dst_lib.display());
-    println!("cargo:rustc-link-lib={}", LIB_BASE);
+    println!("cargo:rustc-link-lib={LIB_BASE}");
 
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -163,20 +163,20 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
     fn header_file(&self, filename: &str) {
         // Make sure to rerun build when dependency outside of `dst/` changes.
         if !self.inside_dst(filename) {
-            println!("cargo:rerun-if-changed={}", filename);
+            println!("cargo:rerun-if-changed={filename}");
         }
     }
 
     fn include_file(&self, filename: &str) {
         // Make sure to rerun build when dependency outside of `dst/` changes.
         if !self.inside_dst(filename) {
-            println!("cargo:rerun-if-changed={}", filename);
+            println!("cargo:rerun-if-changed={filename}");
         }
     }
 
     fn read_env_var(&self, key: &str) {
         // Make sure to rerun build when environment variable changes.
-        println!("cargo:rerun-if-env-changed={}", key);
+        println!("cargo:rerun-if-env-changed={key}");
     }
 
     fn item_name(&self, original_item_name: &str) -> Option<String> {

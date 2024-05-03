@@ -14,7 +14,7 @@ fn create_and_destroy_client() {
 #[test]
 fn variadic_arguments() {
     // Check if `va_list_` type matches.
-    unsafe extern "C" fn log_c(
+    const unsafe extern "C" fn log_c(
         _log_context: *mut ffi::c_void,
         _level: UA_LogLevel,
         _category: UA_LogCategory,
@@ -32,7 +32,7 @@ fn variadic_arguments() {
 #[test]
 fn logger_types() {
     // Check validity of type aliases for `UA_Logger` callbacks.
-    unsafe extern "C" fn log_c(
+    const unsafe extern "C" fn log_c(
         _log_context: *mut ffi::c_void,
         _level: UA_LogLevel,
         _category: UA_LogCategory,
@@ -40,7 +40,7 @@ fn logger_types() {
         _args: va_list_,
     ) {
     }
-    unsafe extern "C" fn clear_c(_logger: *mut UA_Logger) {}
+    const unsafe extern "C" fn clear_c(_logger: *mut UA_Logger) {}
     let log: UA_LoggerLogCallback_ = Some(log_c);
     let clear: UA_LoggerClearCallback_ = Some(clear_c);
     let _logger = UA_Logger {
@@ -57,7 +57,9 @@ fn has_custom_exports() {
     //
     use open62541_sys::{vsnprintf_va_copy, vsnprintf_va_end, UA_EMPTY_ARRAY_SENTINEL};
 
+    #[allow(clippy::no_effect_underscore_binding)] // Check existence of binding.
     let _unused = vsnprintf_va_copy;
+    #[allow(clippy::no_effect_underscore_binding)] // Check existence of binding.
     let _unused = vsnprintf_va_end;
     let _unused = unsafe { UA_EMPTY_ARRAY_SENTINEL };
 }
