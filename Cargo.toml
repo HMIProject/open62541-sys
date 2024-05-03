@@ -51,3 +51,30 @@ include = [
 bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
+
+[lints.rust]
+future_incompatible = "warn"
+let_underscore = "warn"
+nonstandard_style = "warn"
+rust_2018_compatibility = "warn"
+rust_2018_idioms = "warn"
+rust_2021_compatibility = "warn"
+trivial_casts = "warn"
+trivial_numeric_casts = "warn"
+unsafe_op_in_unsafe_fn = "warn"
+unused = "warn"
+warnings = "warn"
+
+[lints.clippy]
+as_conversions = "warn"
+as_ptr_cast_mut = "warn"
+as_underscore = "warn"
+clone_on_ref_ptr = "warn"
+missing_const_for_fn = "warn"
+mod_module_files = "warn"
+pedantic = "warn"
+
+# This warns even when lint group and lint have the same level (`warn`). This is
+# very misleading and results in lots of false positives. See
+# https://github.com/rust-lang/rust-clippy/issues/12270
+lint_groups_priority = "allow"
