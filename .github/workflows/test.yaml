@@ -29,8 +29,7 @@ jobs:
         # Keep list of targets in sync with `latest-dependencies.yaml`.
         include:
           - target: aarch64-apple-darwin
-            # M1 runner on macos-14
-            runner_os: macos-14
+            runner_os: macos-latest
             default_target: true
             runnable: true
           - target: armv7-unknown-linux-gnueabihf
