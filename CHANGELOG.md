@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.4.0-pre.5] - 2024-05-30
 
-- Upgrade to release 1.4.1 of open62541 version 1.4.
+[0.4.0-pre.5]: https://github.com/HMIProject/open62541-sys/compare/v0.4.0-pre.4...v0.4.0-pre.5
+
+### Changed
+
+- Upgrade to release [1.4.1](https://github.com/open62541/open62541/releases/tag/v1.4.1) of
+  open62541 version 1.4.
 
 ## [0.4.0-pre.4] - 2024-04-29
 
@@ -15,7 +20,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Upgrade to release 1.4.0 of open62541 version 1.4.
+- Upgrade to release [1.4.0](https://github.com/open62541/open62541/releases/tag/v1.4.0) of
+  open62541 version 1.4.
 
 ## [0.4.0-pre.3] - 2024-04-04
 
