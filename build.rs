@@ -40,7 +40,7 @@ fn main() {
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "99")
         // Enable encryption features so rust bindings will be generated.
-        .define("UA_ENABLE_ENCRYPTION", "OPENSSL")
+        .define("UA_ENABLE_ENCRYPTION", "MBEDTLS")
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
