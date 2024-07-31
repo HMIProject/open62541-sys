@@ -54,8 +54,9 @@ fn main() {
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
-        // Define include paths and library paths for mbedtls.
-        .define("MBEDCRYPTIO_INCLUDE_PATH", mbedtls_include_path)
+        // Define include path and library path for mbedtls.
+        .define("MBEDTLS_INCLUDE_DIRS", mbedtls_include_path)
+        .define("MBEDTLS_LIBRARY", mbedtls_lib_path)
         .define("MBEDX509_LIBRARY", mbedtls_lib_path)
         .define("MBEDCRYPTO_LIBRARY", mbedtls_lib_path)
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
