@@ -1,6 +1,7 @@
 use std::{
     env,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 /// Target path in CMake build for include files.
@@ -29,6 +30,23 @@ fn main() {
     println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
     println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
 
+    // Install cargo vcpkg subcommand to build mbedtls using it
+    Command::new("cargo")
+        .arg("install")
+        .arg("cargo-vcpkg")
+        .status()
+        .unwrap();
+    Command::new("cargo")
+        .arg("vcpkg")
+        .arg("build")
+        .status()
+        .unwrap();
+
+    // Use vcpkg crate to search for the paths of the compiled mbedtls library.
+    let mbedtls = vcpkg::find_package("mbedtls").unwrap();
+    let mbedtls_include_path = &mbedtls.include_paths[0];
+    let mbedtls_lib_path = &mbedtls.link_paths[0];
+
     // Build bundled copy of `open62541` with CMake.
     let mut cmake = cmake::Config::new(src_open62541);
     cmake
@@ -36,6 +54,10 @@ fn main() {
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
+        // Define include paths and library paths for mbedtls.
+        .define("MBEDCRYPTIO_INCLUDE_PATH", mbedtls_include_path)
+        .define("MBEDX509_LIBRARY", mbedtls_lib_path)
+        .define("MBEDCRYPTO_LIBRARY", mbedtls_lib_path)
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "99")

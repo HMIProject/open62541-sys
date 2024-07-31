@@ -51,6 +51,7 @@ include = [
 bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
+vcpkg = "0.2.15"
 
 [lints.rust]
 future_incompatible = "warn"
@@ -78,3 +79,8 @@ pedantic = "warn"
 # very misleading and results in lots of false positives. See
 # https://github.com/rust-lang/rust-clippy/issues/12270
 lint_groups_priority = "allow"
+
+[package.metadata.vcpkg]
+git = "https://github.com/microsoft/vcpkg"
+rev = "1de2026"
+dependencies = ["mbedtls"]
