@@ -35,12 +35,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      
-      - name: Install Mbed TLS library
-        # To avoid HTTP 404 when package index has been updated, we run `update` first.
-        run: >-
-          sudo apt -y update &&
-          sudo apt -y install libmbedtls-dev
 
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.

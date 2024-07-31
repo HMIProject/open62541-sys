@@ -69,13 +69,6 @@ jobs:
         run: >-
           sudo apt -y update &&
           sudo apt -y install gcc-arm-linux-gnueabihf
-      
-      - name: Install Mbed TLS library
-        if: contains(matrix.target, '-linux-')
-        # To avoid HTTP 404 when package index has been updated, we run `update` first.
-        run: >-
-          sudo apt -y update &&
-          sudo apt -y install libmbedtls-dev
 
       - name: Adjust build settings for Windows
         if: contains(matrix.target, '-windows-')
