@@ -34,15 +34,27 @@ fn main() {
     Command::new("cargo")
         .arg("install")
         .arg("cargo-vcpkg")
-        .status()
-        .unwrap();
-    Command::new("cargo")
-        .arg("vcpkg")
-        .arg("build")
+        .arg("--root")
+        .arg("target/cargo")
         .status()
         .unwrap();
 
-    // Use vcpkg crate to search for the paths of the compiled mbedtls library.
+    // Get path variable and append the directory in target/ which contains
+    // the vcpkg cargo subcommand binary.
+    let path = std::env::var("PATH").unwrap()
+        + ":"
+        + &env::current_dir().expect("").display().to_string()
+        + "/target/cargo/bin";
+
+    // Build the dependencies (mbedtls) specified in Cargo.toml [package.metadata.vcpkg] using vcpkg
+    Command::new("cargo")
+        .arg("vcpkg")
+        .arg("build")
+        .env("PATH", path)
+        .status()
+        .unwrap();
+
+    // Search for the paths of the compiled mbedtls library.
     let mbedtls = vcpkg::find_package("mbedtls").unwrap();
     let mbedtls_include_path = &mbedtls.include_paths[0];
     let mbedtls_lib_path = &mbedtls.link_paths[0];
