@@ -54,9 +54,30 @@ fn main() {
         .status()
         .unwrap();
 
+    // Retrieve the OUT_DIR environment variable, package name, and version
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let package_name = env!("CARGO_PKG_NAME");
+    let package_version = env!("CARGO_PKG_VERSION");
+
+    // Construct the directory path
+    let package_dir_name = format!("{}-{}", package_name, package_version);
+    let package_dir = PathBuf::from(out_dir)
+        .parent() // TODO: Find our if parent is correct.
+        .unwrap()
+        .join("package")
+        .join(package_dir_name);
+
+    let lock_file_path = package_dir.join("Cargo.lock");
+
+    // Remove the Cargo.lock file if it exists
+    if lock_file_path.exists() {
+        fs::remove_file(lock_file_path)
+            .expect("Failed to remove Cargo.lock from package directory");
+    }
+
     // Delete Cargo.lock file which is created when running cargo publish
     // We ignore a possible error because the file may not.
-    fs::remove_file(src.join("target/package/open62541-sys-0.4.1/Cargo.lock")).ok();
+    // fs::remove_file(src.join("target/package/open62541-sys-0.4.1/Cargo.lock")).ok();
 
     let mut vcpkg_config = vcpkg::Config::new();
 
