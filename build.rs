@@ -1,5 +1,5 @@
 use std::{
-    env,
+    env, fs,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -41,8 +41,10 @@ fn main() {
 
     // Get path variable and append the directory in target/ which contains
     // the vcpkg cargo subcommand binary.
-    let path =
-        std::env::var("PATH").unwrap() + ":" + &src.display().to_string() + "/target/cargo/bin";
+    let path = env::var("PATH").unwrap();
+    let mut paths = env::split_paths(&path).collect::<Vec<_>>();
+    paths.push(src.join("target/cargo/bin"));
+    let path = env::join_paths(paths).unwrap();
 
     // Build the dependencies (mbedtls) specified in Cargo.toml [package.metadata.vcpkg] using vcpkg
     Command::new("cargo")
@@ -52,8 +54,18 @@ fn main() {
         .status()
         .unwrap();
 
+    // Delete Cargo.lock file which is created when running cargo publish
+    // We ignore a possible error because the file may not.
+    fs::remove_file(src.join("target/package/open62541-sys-0.4.1/Cargo.lock")).ok();
+
+    let mut vcpkg_config = vcpkg::Config::new();
+
+    if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+        vcpkg_config.target_triplet("x64-linux");
+    }
+
     // Search for the paths of the compiled mbedtls library.
-    let mbedtls = vcpkg::find_package("mbedtls").unwrap();
+    let mbedtls = vcpkg_config.find_package("mbedtls").unwrap();
     let mbedtls_include_path = &mbedtls.include_paths[0];
     let mbedtls_lib_path = &mbedtls.link_paths[0];
 
