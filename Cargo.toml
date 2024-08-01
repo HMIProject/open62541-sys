@@ -86,8 +86,8 @@ dependencies = ["mbedtls"]
 
 [package.metadata.vcpkg.target]
 aarch64-apple-darwin = { triplet = "arm64-osx-static" }
-armv7-unknown-linux-gnueabihf = { triplet = "arm-linux-static" }
+armv7-unknown-linux-gnueabihf = { triplet = "arm-linux" }
 x86_64-apple-darwin = { triplet = "x64-osx-static" }
-x86_64-pc-windows-msvc = { triplet = "x64-windows-static" }
-x86_64-unknown-linux-gnu = { triplet = "x64-linux-static" }
-x86_64-unknown-linux-musl = { triplet = "x64-linux-static" }
+x86_64-pc-windows-msvc = { triplet = "x64-windows-static-md" }
+x86_64-unknown-linux-gnu = { triplet = "x64-linux" }
+x86_64-unknown-linux-musl = { triplet = "x64-linux" }
