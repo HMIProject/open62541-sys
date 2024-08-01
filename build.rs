@@ -41,10 +41,8 @@ fn main() {
 
     // Get path variable and append the directory in target/ which contains
     // the vcpkg cargo subcommand binary.
-    let path = std::env::var("PATH").unwrap()
-        + ":"
-        + &env::current_dir().expect("").display().to_string()
-        + "/target/cargo/bin";
+    let path =
+        std::env::var("PATH").unwrap() + ":" + &src.display().to_string() + "/target/cargo/bin";
 
     // Build the dependencies (mbedtls) specified in Cargo.toml [package.metadata.vcpkg] using vcpkg
     Command::new("cargo")
