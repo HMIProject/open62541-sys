@@ -3,9 +3,8 @@ name = "open62541-sys"
 version = "0.4.2"
 authors = ["HMI Project"]
 edition = "2021"
-# Keep the MSRV number here in sync with `test.yaml`/`build.rs`. We require Rust
-# 1.72 (the linux-musl build fails with earlier versions).
-rust-version = "1.72"
+# Keep the MSRV number here in sync with `test.yaml`/`build.rs`. We require Rust 1.73.
+rust-version = "1.73"
 description = "Low-level, unsafe bindings for the C99 library open62541, an open source and free implementation of OPC UA (OPC Unified Architecture)."
 documentation = "https://docs.rs/open62541-sys"
 readme = "README.md"
@@ -51,6 +50,7 @@ include = [
 bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
+vcpkg = "0.2.15"
 
 [lints.rust]
 future_incompatible = "warn"
@@ -78,3 +78,16 @@ pedantic = "warn"
 # very misleading and results in lots of false positives. See
 # https://github.com/rust-lang/rust-clippy/issues/12270
 lint_groups_priority = "allow"
+
+[package.metadata.vcpkg]
+git = "https://github.com/microsoft/vcpkg"
+rev = "1de2026"
+dependencies = ["mbedtls"]
+
+[package.metadata.vcpkg.target]
+aarch64-apple-darwin = { triplet = "arm64-osx" }
+armv7-unknown-linux-gnueabihf = { triplet = "arm-linux" }
+x86_64-apple-darwin = { triplet = "x64-osx" }
+x86_64-pc-windows-msvc = { triplet = "x64-windows-static-md" }
+x86_64-unknown-linux-gnu = { triplet = "x64-linux" }
+x86_64-unknown-linux-musl = { triplet = "x64-linux" }

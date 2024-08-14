@@ -1,6 +1,7 @@
 use std::{
-    env,
+    env, fs,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 /// Target path in CMake build for include files.
@@ -29,6 +30,66 @@ fn main() {
     println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
     println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
 
+    // Install cargo vcpkg subcommand to build mbedtls using it
+    Command::new("cargo")
+        .arg("install")
+        .arg("cargo-vcpkg")
+        .arg("--root")
+        .arg("target/cargo")
+        .status()
+        .unwrap();
+
+    // Get path variable and append the directory in target/ which contains
+    // the vcpkg cargo subcommand binary.
+    let path = env::var("PATH").unwrap();
+    let mut paths = env::split_paths(&path).collect::<Vec<_>>();
+    paths.push(src.join("target/cargo/bin"));
+    let path = env::join_paths(paths).unwrap();
+
+    // Build the dependencies (mbedtls) specified in Cargo.toml [package.metadata.vcpkg] using vcpkg
+    Command::new("cargo")
+        .arg("vcpkg")
+        .arg("build")
+        .env("PATH", path)
+        .status()
+        .unwrap();
+
+    // Retrieve the OUT_DIR environment variable, package name, and version
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
+    let package_name = env!("CARGO_PKG_NAME");
+    let package_version = env!("CARGO_PKG_VERSION");
+
+    // Construct the directory path
+    let package_dir_name = format!("{}-{}", package_name, package_version);
+    let package_dir = PathBuf::from(out_dir)
+        .parent() // TODO: Find our if parent is correct.
+        .unwrap()
+        .join("package")
+        .join(package_dir_name);
+
+    let lock_file_path = package_dir.join("Cargo.lock");
+
+    // Remove the Cargo.lock file if it exists
+    if lock_file_path.exists() {
+        fs::remove_file(lock_file_path)
+            .expect("Failed to remove Cargo.lock from package directory");
+    }
+
+    // Delete Cargo.lock file which is created when running cargo publish
+    // We ignore a possible error because the file may not.
+    // fs::remove_file(src.join("target/package/open62541-sys-0.4.1/Cargo.lock")).ok();
+
+    let mut vcpkg_config = vcpkg::Config::new();
+
+    if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+        vcpkg_config.target_triplet("x64-linux");
+    }
+
+    // Search for the paths of the compiled mbedtls library.
+    let mbedtls = vcpkg_config.find_package("mbedtls").unwrap();
+    let mbedtls_include_path = &mbedtls.include_paths[0];
+    let mbedtls_lib_path = &mbedtls.link_paths[0];
+
     // Build bundled copy of `open62541` with CMake.
     let mut cmake = cmake::Config::new(src_open62541);
     cmake
@@ -36,9 +97,16 @@ fn main() {
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
+        // Define include path and library path for mbedtls.
+        .define("MBEDTLS_INCLUDE_DIRS", mbedtls_include_path)
+        .define("MBEDTLS_LIBRARY", mbedtls_lib_path)
+        .define("MBEDX509_LIBRARY", mbedtls_lib_path)
+        .define("MBEDCRYPTO_LIBRARY", mbedtls_lib_path)
         // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "99")
+        // Enable encryption features so rust bindings will be generated.
+        .define("UA_ENABLE_ENCRYPTION", "MBEDTLS")
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
