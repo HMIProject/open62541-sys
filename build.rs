@@ -17,6 +17,7 @@ const LIB_BASE: &str = "open62541";
 const LIB_EXT: &str = "open62541-ext";
 
 fn main() {
+    let with_openssl = matches!(env::var("CARGO_FEATURE_OPENSSL"), Ok(env) if !env.is_empty());
     let src = env::current_dir().expect("should get current directory");
 
     // Get derived paths relative to `src`.
@@ -54,7 +55,7 @@ fn main() {
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
     }
 
-    if matches!(env::var("CARGO_FEATURE_OPENSSL"), Ok(env) if !env.is_empty()) {
+    if with_openssl {
         // With feature flag `openssl`, we build `open62541` with OpenSSL support. This also changes
         // the resulting `bindings.rs`.
         cmake.define("UA_ENABLE_ENCRYPTION", "OPENSSL");
@@ -74,6 +75,26 @@ fn main() {
 
     println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib={LIB_BASE}");
+
+    if with_openssl {
+        // For macOS, we require the precise link path because OpenSSL is expected to be provided by
+        // Homebrew.
+        if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "macos") {
+            println!("cargo:rustc-link-search=/opt/homebrew/opt/openssl/lib");
+        }
+
+        // With feature flag `openssl`, we build `open62541` with OpenSSL support. We explicitly add
+        // the library as dependency for the final build artifact.
+        //
+        // Note: These must come _after_ adding `LIB_BASE` above for linker to resolve dependencies.
+        println!("cargo:rustc-link-lib=ssl");
+        println!("cargo:rustc-link-lib=crypto");
+
+        // For musl builds, we must add the `gcc` library that is required by `openssl`.
+        if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+            println!("cargo:rustc-link-lib=gcc");
+        }
+    }
 
     let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
 
