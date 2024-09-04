@@ -17,6 +17,8 @@ const LIB_BASE: &str = "open62541";
 const LIB_EXT: &str = "open62541-ext";
 
 fn main() {
+    let with_mbedtls = matches!(env::var("CARGO_FEATURE_MBEDTLS"), Ok(env) if !env.is_empty());
+
     let src = env::current_dir().expect("should get current directory");
 
     // Get derived paths relative to `src`.
@@ -54,6 +56,42 @@ fn main() {
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
     }
 
+    let mut cargo_metadata = vec![];
+
+    if with_mbedtls {
+        let mut vcpkg_config = vcpkg::Config::new();
+
+        // Disable automatically emitting cargo instructions: we require them _after_ we have output
+        // our own lines below for the dependency resolution to work correctly.
+        vcpkg_config.cargo_metadata(false);
+
+        if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+            vcpkg_config.target_triplet("x64-linux");
+        }
+
+        // Search for path of compiled Mbed TLS library. If `vcpkg` has been used, forward the paths
+        // to CMake. If not set, CMake falls back to looking for system-wide installation.
+        match vcpkg_config.find_package("mbedtls") {
+            Ok(mbedtls) => {
+                let mbedtls_include = &mbedtls.include_paths.first().expect("require include path");
+                let mbedtls_lib = &mbedtls.link_paths.first().expect("require lib path");
+
+                cmake
+                    // Define include path and library path for Mbed TLS.
+                    .define("MBEDTLS_FOLDER_INCLUDE", mbedtls_include)
+                    .define("MBEDTLS_FOLDER_LIBRARY", mbedtls_lib);
+
+                cargo_metadata.extend_from_slice(&mbedtls.cargo_metadata);
+            }
+            Err(err) => {
+                panic!("unable to find mbedtls in vcpkg root: {err:#}");
+            }
+        }
+
+        // Build `open62541` with Mbed TLS support enabled.
+        cmake.define("UA_ENABLE_ENCRYPTION", "MBEDTLS");
+    }
+
     let dst = cmake.build();
 
     // Get derived paths relative to `dst`.
@@ -68,6 +106,10 @@ fn main() {
 
     println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib={LIB_BASE}");
+
+    for line in cargo_metadata {
+        println!("{}", line);
+    }
 
     let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
 

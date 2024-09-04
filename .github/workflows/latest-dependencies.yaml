@@ -90,7 +90,7 @@ jobs:
 
       - name: Install Cargo helpers
         run: >-
-          cargo install cargo-hack
+          cargo install cargo-hack cargo-vcpkg
 
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
@@ -112,6 +112,11 @@ jobs:
       - name: Update crates to latest versions
         run: >-
           cargo update --verbose
+
+      - name: Build Mbed TLS
+        run: >-
+          cargo vcpkg build
+          --target ${{ matrix.target }}
 
       - name: Build with feature combinations
         run: >-

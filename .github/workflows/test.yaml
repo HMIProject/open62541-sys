@@ -88,7 +88,7 @@ jobs:
 
       - name: Install Cargo helpers
         run: >-
-          cargo install cargo-hack
+          cargo install --locked cargo-hack cargo-vcpkg
 
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
@@ -102,6 +102,11 @@ jobs:
         with:
           # The cache should not be shared between different workflows, jobs, and targets.
           shared-key: ${{ github.workflow }}-${{ github.job }}-${{ matrix.target }}
+
+      - name: Build Mbed TLS
+        run: >-
+          cargo vcpkg build
+          --target ${{ matrix.target }}
 
       - name: Build with feature combinations
         run: >-

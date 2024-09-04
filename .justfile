@@ -30,7 +30,7 @@ setup:
     # Ignore rustup failures, because not everyone might use it
     rustup self update || true
     # cargo-edit is needed for `cargo upgrade`
-    cargo install cargo-edit cargo-hack just
+    cargo install cargo-edit cargo-hack cargo-vcpkg just
     pip install -U pre-commit
 
 # Upgrade (and update) dependencies
