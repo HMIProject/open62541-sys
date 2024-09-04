@@ -89,11 +89,6 @@ fn main() {
         // Note: These must come _after_ adding `LIB_BASE` above for linker to resolve dependencies.
         println!("cargo:rustc-link-lib=ssl");
         println!("cargo:rustc-link-lib=crypto");
-
-        // For musl builds, we must add the `gcc` library to provide adapters required by `openssl`.
-        if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
-            println!("cargo:rustc-link-lib=gcc");
-        }
     }
 
     let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
