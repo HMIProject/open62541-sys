@@ -104,10 +104,6 @@ jobs:
         run: >-
           cargo install cross
 
-      - name: Install Cargo helpers
-        run: >-
-          cargo install cargo-hack
-
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
       - name: Check out repository
@@ -121,24 +117,32 @@ jobs:
           # The cache should not be shared between different workflows, jobs, and targets.
           shared-key: ${{ github.workflow }}-${{ github.job }}-${{ matrix.target }}
 
-      - name: Build with feature combinations
+      - name: Build without default features
         run: >-
-          ${{ matrix.build_cmd }} hack --each-feature build --locked
-          --target ${{ matrix.target }}
+          ${{ matrix.build_cmd }} build --locked
+          --target ${{ matrix.target }} --no-default-features
 
-      - name: Run tests (bins/lib/tests/examples) with feature combinations
+      - name: Build with "openssl" feature
+        run: >-
+          ${{ matrix.build_cmd }} build --locked
+          --target ${{ matrix.target }} --features openssl
+
+      - name: Run tests (bins/lib/tests/examples) without default features
         if: matrix.runnable
         run: >-
-          ${{ matrix.build_cmd }} hack --each-feature test --locked
-          --target ${{ matrix.target }}
+          ${{ matrix.build_cmd }} test --locked
+          --target ${{ matrix.target }} --no-default-features
+          --bins --lib --tests --examples
+
+      - name: Run tests (bins/lib/tests/examples) with "openssl" feature
+        if: matrix.runnable
+        run: >-
+          ${{ matrix.build_cmd }} test --locked
+          --target ${{ matrix.target }} --features openssl
           --bins --lib --tests --examples
 
       # Compile and run doctests, which have been excluded in the previous
       # step(s).
-      #
-      # Doctests may use any features and there is no easy way to activate
-      # certain features only for some doctests, so we run them without
-      # `cargo-hack`.
       #
       # When cross-compiling the doctests are skipped silently, even with the
       # default target options that should include them!
