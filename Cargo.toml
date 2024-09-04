@@ -51,6 +51,11 @@ include = [
 bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
+vcpkg = "0.2.15"
+
+[features]
+default = []
+mbedtls = []
 
 [lints.rust]
 future_incompatible = { level = "warn", priority = -1 }
@@ -111,3 +116,17 @@ unreachable = "warn"
 unwrap_in_result = "warn"
 unwrap_used = "warn"
 verbose_file_reads = "warn"
+
+[package.metadata.vcpkg]
+dependencies = ["mbedtls"]
+# These are required for running `vcpkg build` locally or in CI:
+git = "https://github.com/microsoft/vcpkg"
+branch = "master"
+
+[package.metadata.vcpkg.target]
+aarch64-apple-darwin = { triplet = "arm64-osx" }
+armv7-unknown-linux-gnueabihf = { triplet = "arm-linux" }
+x86_64-apple-darwin = { triplet = "x64-osx" }
+x86_64-pc-windows-msvc = { triplet = "x64-windows-static-md" }
+x86_64-unknown-linux-gnu = { triplet = "x64-linux" }
+x86_64-unknown-linux-musl = { triplet = "x64-linux" }
