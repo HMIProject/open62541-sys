@@ -54,6 +54,12 @@ fn main() {
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
     }
 
+    if matches!(env::var("CARGO_FEATURE_OPENSSL"), Ok(env) if !env.is_empty()) {
+        // With feature flag `openssl`, we build `open62541` with OpenSSL support. This also changes
+        // the resulting `bindings.rs`.
+        cmake.define("UA_ENABLE_ENCRYPTION", "OPENSSL");
+    }
+
     let dst = cmake.build();
 
     // Get derived paths relative to `dst`.

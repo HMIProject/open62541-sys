@@ -70,6 +70,13 @@ jobs:
           sudo apt -y update &&
           sudo apt -y install gcc-arm-linux-gnueabihf
 
+      - name: Install OpenSSL for Linux
+        if: contains(matrix.target, '-linux-')
+        # To avoid HTTP 404 when package index has been updated, we run `update` first.
+        run: >-
+          sudo apt -y update &&
+          sudo apt -y install libssl-dev
+
       - name: Adjust build settings for Windows
         if: contains(matrix.target, '-windows-')
         # Required for Windows builds: for version numbers with pre-release part
