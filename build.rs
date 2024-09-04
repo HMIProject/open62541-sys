@@ -90,7 +90,7 @@ fn main() {
         println!("cargo:rustc-link-lib=ssl");
         println!("cargo:rustc-link-lib=crypto");
 
-        // For musl builds, we must add the `gcc` library that is required by `openssl`.
+        // For musl builds, we must add the `gcc` library to provide adapters required by `openssl`.
         if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
             println!("cargo:rustc-link-lib=gcc");
         }

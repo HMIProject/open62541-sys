@@ -30,26 +30,32 @@ jobs:
         include:
           - target: aarch64-apple-darwin
             runner_os: macos-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: armv7-unknown-linux-gnueabihf
             runner_os: ubuntu-latest
+            build_cmd: cross
             default_target: false
             runnable: false
           - target: x86_64-apple-darwin
             runner_os: macos-latest
+            build_cmd: cross
             default_target: true
             runnable: true
           - target: x86_64-pc-windows-msvc
             runner_os: windows-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: x86_64-unknown-linux-gnu
             runner_os: ubuntu-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: x86_64-unknown-linux-musl
             runner_os: ubuntu-latest
+            build_cmd: cargo
             default_target: false
             runnable: true
 
@@ -57,14 +63,14 @@ jobs:
 
     steps:
       - name: Install build tools for musl libc
-        if: endsWith(matrix.target, '-musl')
+        if: matrix.build_cmd == 'cargo' && endsWith(matrix.target, '-musl')
         # To avoid HTTP 404 when package index has been updated, we run `update` first.
         run: >-
           sudo apt -y update &&
           sudo apt -y install musl-tools
 
       - name: Install build tools for ARMv7
-        if: startsWith(matrix.target, 'armv7-')
+        if: matrix.build_cmd == 'cargo' && startsWith(matrix.target, 'armv7-')
         # To avoid HTTP 404 when package index has been updated, we run `update` first.
         run: >-
           sudo apt -y update &&
@@ -93,6 +99,11 @@ jobs:
           # Otherwise the default toolchain might be used unintentionally.
           targets: ${{ matrix.target }}
 
+      - name: Install build tools for cross compilation
+        if: matrix.build_cmd == 'cross'
+        run: >-
+          cargo install cross
+
       - name: Install Cargo helpers
         run: >-
           cargo install cargo-hack
@@ -112,13 +123,13 @@ jobs:
 
       - name: Build with feature combinations
         run: >-
-          cargo hack --each-feature build --locked
+          ${{ matrix.build_cmd }} hack --each-feature build --locked
           --target ${{ matrix.target }}
 
       - name: Run tests (bins/lib/tests/examples) with feature combinations
         if: matrix.runnable
         run: >-
-          cargo hack --each-feature test --locked
+          ${{ matrix.build_cmd }} hack --each-feature test --locked
           --target ${{ matrix.target }}
           --bins --lib --tests --examples
 
@@ -140,10 +151,10 @@ jobs:
       - name: Run doctests with all features enabled
         if: matrix.default_target
         run: >-
-          cargo test --locked --all-features
+          ${{ matrix.build_cmd }} test --locked --all-features
           --doc
 
       - name: Build package with all features enabled
         run: >-
-          cargo package --locked --all-features
+          ${{ matrix.build_cmd }} package --locked --all-features
           --target ${{ matrix.target }}
