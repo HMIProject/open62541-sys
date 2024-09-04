@@ -52,6 +52,10 @@ bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
 
+[features]
+default = []
+openssl = []
+
 [lints.rust]
 future_incompatible = { level = "warn", priority = -1 }
 keyword_idents = { level = "warn", priority = -1 }
