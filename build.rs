@@ -17,7 +17,7 @@ const LIB_BASE: &str = "open62541";
 const LIB_EXT: &str = "open62541-ext";
 
 fn main() {
-    let src = env::current_dir().unwrap();
+    let src = env::current_dir().expect("should get current directory");
 
     // Get derived paths relative to `src`.
     let src_open62541 = src.join("open62541");
@@ -45,7 +45,7 @@ fn main() {
         .env("PYTHONDONTWRITEBYTECODE", "1");
 
     if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
-        let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+        let arch = env::var("CARGO_CFG_TARGET_ARCH").expect("should have CARGO_CFG_TARGET_ARCH");
         // We require includes from the Linux headers which are not provided automatically when musl
         // is targeted (see https://github.com/open62541/open62541/issues/6360).
         // TODO: Remove this when `open62541` enables us to build without including Linux headers.
@@ -69,7 +69,7 @@ fn main() {
     println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib={LIB_BASE}");
 
-    let out = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
 
     // Get derived paths relative to `out`.
     let out_bindings_rs = out.join("bindings.rs");
@@ -104,7 +104,7 @@ fn main() {
         // The auto-derived comments are not particularly useful because they often do not match the
         // declaration they belong to.
         .generate_comments(false)
-        .header(src_wrapper_h.to_str().unwrap())
+        .header(src_wrapper_h.to_str().expect("should be valid path"))
         // Activate parse callbacks. This causes cargo to invalidate the generated bindings when any
         // of the included files change. It also enables us to rename items in the final bindings.
         .parse_callbacks(Box::new(CustomCallbacks { dst }))
@@ -115,7 +115,7 @@ fn main() {
         .wrap_static_fns(true)
         // Make sure to specify the location of the resulting `extern.c`. By default `bindgen` would
         // place it in the temporary directory.
-        .wrap_static_fns_path(out_extern_c.to_str().unwrap());
+        .wrap_static_fns_path(out_extern_c.to_str().expect("should be valid path"));
 
     let bindings = builder
         .generate()
