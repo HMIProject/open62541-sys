@@ -213,7 +213,7 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
 /// Replaces all occurrences of pattern in file.
 ///
 /// Note that this is not particularly efficient because it reads the entire file into memory before
-/// witing it back. Care should be taken when operating on large files.
+/// writing it back. Care should be taken when operating on large files.
 fn replace_in_file(path: &Path, pattern: &str, replacement: &str) -> io::Result<()> {
     let buf = io::read_to_string(File::open(path)?)?;
 
