@@ -1,5 +1,7 @@
 use std::{
     env,
+    fs::File,
+    io::{self, Write as _},
     path::{Path, PathBuf},
 };
 
@@ -15,6 +17,16 @@ const LIB_BASE: &str = "open62541";
 /// compilation of static (inline) functions from `open62541` itself. This may be an arbitrary name;
 /// the `cc` build adds it as `rustc-link-lib` automatically.
 const LIB_EXT: &str = "open62541-ext";
+
+/// Pattern to search for compatibility with Edition 2024.
+///
+/// See also [`UNSAFE_EXTERN_REPLACEMENT`].
+const EXTERN_PATTERN: &str = r#"extern "C" {"#;
+
+/// Pattern to replace for compatibility with Edition 2024.
+///
+/// See also [`EXTERN_PATTERN`].
+const UNSAFE_EXTERN_REPLACEMENT: &str = r#"unsafe extern "C" {"#;
 
 fn main() {
     let src = env::current_dir().expect("should get current directory");
@@ -122,8 +134,13 @@ fn main() {
         .expect("should generate `Bindings` instance");
 
     bindings
-        .write_to_file(out_bindings_rs)
+        .write_to_file(out_bindings_rs.clone())
         .expect("should write `bindings.rs`");
+
+    // Until <https://github.com/rust-lang/rust-bindgen/issues/2901> is resolved, we replace `extern
+    // "C"` with `unsafe extern "C"` manually here. Remove this when `bindgen` is able to do it.
+    replace_in_file(&out_bindings_rs, EXTERN_PATTERN, UNSAFE_EXTERN_REPLACEMENT)
+        .expect("should add unsafe to extern statements");
 
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
     // link in addition to the base `open62541` library.
@@ -183,4 +200,18 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
         // Rename our wrapped custom exports to their intended names.
         original_item_name.strip_prefix("RS_").map(str::to_owned)
     }
+}
+
+/// Replaces all occurrences of pattern in file.
+///
+/// Note that this is not particularly efficient because it reads the entire file into memory before
+/// witing it back. Care should be taken when operating on large files.
+fn replace_in_file(path: &Path, pattern: &str, replacement: &str) -> io::Result<()> {
+    let buf = io::read_to_string(File::open(path)?)?;
+
+    let buf = buf.replace(pattern, replacement);
+
+    File::create(path)?.write_all(buf.as_bytes())?;
+
+    Ok(())
 }
