@@ -139,8 +139,12 @@ fn main() {
 
     // Until <https://github.com/rust-lang/rust-bindgen/issues/2901> is resolved, we replace `extern
     // "C"` with `unsafe extern "C"` manually here. Remove this when `bindgen` is able to do it.
-    replace_in_file(&out_bindings_rs, EXTERN_PATTERN, UNSAFE_EXTERN_REPLACEMENT)
-        .expect("should add unsafe to extern statements");
+    if version_check::is_min_version("1.82.0") == Some(true) {
+        // We can only use `extern unsafe` starting with Rust 1.82.0. See
+        // <https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#safe-items-with-unsafe-extern>.
+        replace_in_file(&out_bindings_rs, EXTERN_PATTERN, UNSAFE_EXTERN_REPLACEMENT)
+            .expect("should add unsafe to extern statements");
+    }
 
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
     // link in addition to the base `open62541` library.

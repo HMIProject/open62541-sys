@@ -51,6 +51,7 @@ include = [
 bindgen = { version = "0.69.4", features = ["experimental"] }
 cc = "1.0.83"
 cmake = "0.1.50"
+version_check = "0.9.5"
 
 [lints.rust]
 future_incompatible = { level = "warn", priority = -1 }
