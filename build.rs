@@ -20,13 +20,13 @@ const LIB_EXT: &str = "open62541-ext";
 
 /// Pattern to search for compatibility with Edition 2024.
 ///
-/// See also [`UNSAFE_EXTERN_REPLACEMENT`].
-const EXTERN_PATTERN: &str = r#"extern "C" {"#;
+/// See also [`LEGACY_EXTERN_REPLACEMENT`].
+const LEGACY_EXTERN_PATTERN: &str = r#"extern "C" {"#;
 
 /// Pattern to replace for compatibility with Edition 2024.
 ///
-/// See also [`EXTERN_PATTERN`].
-const UNSAFE_EXTERN_REPLACEMENT: &str = r#"unsafe extern "C" {"#;
+/// See also [`LEGACY_EXTERN_PATTERN`].
+const LEGACY_EXTERN_REPLACEMENT: &str = r#"unsafe extern "C" {"#;
 
 fn main() {
     let src = env::current_dir().expect("should get current directory");
@@ -142,8 +142,12 @@ fn main() {
     if version_check::is_min_version("1.82.0") == Some(true) {
         // We can only use `extern unsafe` starting with Rust 1.82.0. See
         // <https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#safe-items-with-unsafe-extern>.
-        replace_in_file(&out_bindings_rs, EXTERN_PATTERN, UNSAFE_EXTERN_REPLACEMENT)
-            .expect("should add unsafe to extern statements");
+        replace_in_file(
+            &out_bindings_rs,
+            LEGACY_EXTERN_PATTERN,
+            LEGACY_EXTERN_REPLACEMENT,
+        )
+        .expect("should add unsafe to extern statements");
     }
 
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
