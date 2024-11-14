@@ -23,7 +23,7 @@ const LIB_EXT: &str = "open62541-ext";
 /// See also [`LEGACY_EXTERN_REPLACEMENT`].
 const LEGACY_EXTERN_PATTERN: &str = r#"extern "C" {"#;
 
-/// Pattern to replace for compatibility with Edition 2024.
+/// Replacement to use for compatibility with Edition 2024.
 ///
 /// See also [`LEGACY_EXTERN_PATTERN`].
 const LEGACY_EXTERN_REPLACEMENT: &str = r#"unsafe extern "C" {"#;
