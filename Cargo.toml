@@ -53,6 +53,10 @@ cc = "1.0.83"
 cmake = "0.1.50"
 version_check = "0.9.5"
 
+[features]
+default = []
+openssl = []
+
 [lints.rust]
 future_incompatible = { level = "warn", priority = -1 }
 keyword_idents = { level = "warn", priority = -1 }

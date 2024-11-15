@@ -30,26 +30,32 @@ jobs:
         include:
           - target: aarch64-apple-darwin
             runner_os: macos-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: armv7-unknown-linux-gnueabihf
             runner_os: ubuntu-latest
+            build_cmd: cross
             default_target: false
             runnable: false
           - target: x86_64-apple-darwin
             runner_os: macos-latest
+            build_cmd: cross
             default_target: true
             runnable: true
           - target: x86_64-pc-windows-msvc
             runner_os: windows-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: x86_64-unknown-linux-gnu
             runner_os: ubuntu-latest
+            build_cmd: cargo
             default_target: true
             runnable: true
           - target: x86_64-unknown-linux-musl
             runner_os: ubuntu-latest
+            build_cmd: cross
             default_target: false
             runnable: true
 
@@ -57,18 +63,25 @@ jobs:
 
     steps:
       - name: Install build tools for musl libc
-        if: endsWith(matrix.target, '-musl')
+        if: matrix.build_cmd == 'cargo' && endsWith(matrix.target, '-musl')
         # To avoid HTTP 404 when package index has been updated, we run `update` first.
         run: >-
           sudo apt -y update &&
           sudo apt -y install musl-tools
 
       - name: Install build tools for ARMv7
-        if: startsWith(matrix.target, 'armv7-')
+        if: matrix.build_cmd == 'cargo' && startsWith(matrix.target, 'armv7-')
         # To avoid HTTP 404 when package index has been updated, we run `update` first.
         run: >-
           sudo apt -y update &&
           sudo apt -y install gcc-arm-linux-gnueabihf
+
+      - name: Install OpenSSL for Linux
+        if: contains(matrix.target, '-linux-')
+        # To avoid HTTP 404 when package index has been updated, we run `update` first.
+        run: >-
+          sudo apt -y update &&
+          sudo apt -y install libssl-dev
 
       - name: Adjust build settings for Windows
         if: contains(matrix.target, '-windows-')
@@ -86,9 +99,10 @@ jobs:
           # Otherwise the default toolchain might be used unintentionally.
           targets: ${{ matrix.target }}
 
-      - name: Install Cargo helpers
+      - name: Install build tools for cross compilation
+        if: matrix.build_cmd == 'cross'
         run: >-
-          cargo install cargo-hack
+          cargo install cross
 
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
@@ -103,24 +117,32 @@ jobs:
           # The cache should not be shared between different workflows, jobs, and targets.
           shared-key: ${{ github.workflow }}-${{ github.job }}-${{ matrix.target }}
 
-      - name: Build with feature combinations
+      - name: Build without default features
         run: >-
-          cargo hack --each-feature build --locked
-          --target ${{ matrix.target }}
+          ${{ matrix.build_cmd }} build --locked
+          --target ${{ matrix.target }} --no-default-features
 
-      - name: Run tests (bins/lib/tests/examples) with feature combinations
+      - name: Build with "openssl" feature
+        run: >-
+          ${{ matrix.build_cmd }} build --locked
+          --target ${{ matrix.target }} --features openssl
+
+      - name: Run tests (bins/lib/tests/examples) without default features
         if: matrix.runnable
         run: >-
-          cargo hack --each-feature test --locked
-          --target ${{ matrix.target }}
+          ${{ matrix.build_cmd }} test --locked
+          --target ${{ matrix.target }} --no-default-features
+          --bins --lib --tests --examples
+
+      - name: Run tests (bins/lib/tests/examples) with "openssl" feature
+        if: matrix.runnable
+        run: >-
+          ${{ matrix.build_cmd }} test --locked
+          --target ${{ matrix.target }} --features openssl
           --bins --lib --tests --examples
 
       # Compile and run doctests, which have been excluded in the previous
       # step(s).
-      #
-      # Doctests may use any features and there is no easy way to activate
-      # certain features only for some doctests, so we run them without
-      # `cargo-hack`.
       #
       # When cross-compiling the doctests are skipped silently, even with the
       # default target options that should include them!
@@ -133,10 +155,10 @@ jobs:
       - name: Run doctests with all features enabled
         if: matrix.default_target
         run: >-
-          cargo test --locked --all-features
+          ${{ matrix.build_cmd }} test --locked --all-features
           --doc
 
       - name: Build package with all features enabled
         run: >-
-          cargo package --locked --all-features
+          ${{ matrix.build_cmd }} package --locked --all-features
           --target ${{ matrix.target }}
