@@ -15,36 +15,36 @@ license = "MPL-2.0"
 keywords = ["opcua", "plc", "automation", "hardware", "protocol"]
 categories = ["network-programming", "embedded", "external-ffi-bindings"]
 include = [
-    "CHANGELOG.md",
-    "README.md",
-    "build.rs",
-    "src/",
-    "wrapper.c",
-    "wrapper.h",
-    "open62541/**/CMakeLists.txt",
-    "open62541/arch/",
-    "open62541/deps/",
-    # Exclude large dependencies that we do not use. If build fails, check first
-    # if one of these is missing.
-    "!open62541/deps/mdnsd/",
-    "!open62541/deps/mqtt-c/",
-    "!open62541/deps/nodesetLoader/",
-    # We do not include OPC UA NodeSets. They are required when implementing OPC
-    # UA servers: the `nodeset_compiler` tool uses these definitions to generate
-    # custom C and header files that can be used in a server implementation. See
-    # `open62541/doc/nodeset_compiler.rst` for details.
-    "!open62541/deps/ua-nodeset/",
-    # We require this file only to make sure the directory `ua-nodeset/` exists.
-    "open62541/deps/ua-nodeset/readme.md",
-    "open62541/doc/conf.py",
-    "open62541/include/open62541/",
-    "open62541/plugins/",
-    "open62541/tools/certs/",
-    "open62541/tools/cmake/",
-    "open62541/tools/generate_*.py",
-    "open62541/tools/nodeset_compiler/",
-    "open62541/tools/open62541.pc.in",
-    "open62541/tools/schema/",
+  "CHANGELOG.md",
+  "README.md",
+  "build.rs",
+  "src/",
+  "wrapper.c",
+  "wrapper.h",
+  "open62541/**/CMakeLists.txt",
+  "open62541/arch/",
+  "open62541/deps/",
+  # Exclude large dependencies that we do not use. If build fails, check first
+  # if one of these is missing.
+  "!open62541/deps/mdnsd/",
+  "!open62541/deps/mqtt-c/",
+  "!open62541/deps/nodesetLoader/",
+  # We do not include OPC UA NodeSets. They are required when implementing OPC
+  # UA servers: the `nodeset_compiler` tool uses these definitions to generate
+  # custom C and header files that can be used in a server implementation. See
+  # `open62541/doc/nodeset_compiler.rst` for details.
+  "!open62541/deps/ua-nodeset/",
+  # We require this file only to make sure the directory `ua-nodeset/` exists.
+  "open62541/deps/ua-nodeset/readme.md",
+  "open62541/doc/conf.py",
+  "open62541/include/open62541/",
+  "open62541/plugins/",
+  "open62541/tools/certs/",
+  "open62541/tools/cmake/",
+  "open62541/tools/generate_*.py",
+  "open62541/tools/nodeset_compiler/",
+  "open62541/tools/open62541.pc.in",
+  "open62541/tools/schema/",
 ]
 
 [build-dependencies]
