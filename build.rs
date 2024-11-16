@@ -235,7 +235,13 @@ fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
 
     // The set of MbedTLS libraries that must be linked to work with `open62541` has been taken from
     // <https://github.com/open62541/open62541/blob/master/tools/cmake/FindMbedTLS.cmake>.
-    let libs = vec!["mbedtls", "mbedx509", "mbedcrypto"];
+    let mut libs = vec!["mbedtls", "mbedx509", "mbedcrypto"];
+
+    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "windows") {
+        // For some reason, newer Rust versions (?) require an explicit import of `bcrypt.lib` while
+        // older Rust versions (?) seem fine without this import. Add it regardless.
+        libs.push("bcrypt");
+    }
 
     EncryptionDst::MbedTls { dst, libs }
 }
