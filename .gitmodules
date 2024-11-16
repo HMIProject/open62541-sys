@@ -1,3 +1,6 @@
+[submodule "mbedtls"]
+	path = mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
 [submodule "open62541"]
 	path = open62541
 	url = https://github.com/open62541/open62541.git
