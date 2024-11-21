@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- Include bindings for functions from header files `plugin/accesscontrol.h`,
+  `plugin/accesscontrol_default.h`.
+
 ### Changed
 
 - Upgrade to build dependency bindgen version
