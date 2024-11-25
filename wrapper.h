@@ -16,6 +16,7 @@
 
 // Include files that are only available (by CMake) with certain flags.
 #ifdef UA_ENABLE_ENCRYPTION
+#include <open62541/plugin/create_certificate.h>
 #include <open62541/plugin/securitypolicy_default.h>
 #endif
 
