@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Fix Mbed TLS build on certain macOS versions.
+
 ## [0.4.8] - 2024-11-26
 
 ### Added
@@ -167,6 +173,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.8...HEAD
 [0.4.8]: https://github.com/HMIProject/open62541-sys/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/HMIProject/open62541-sys/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/HMIProject/open62541-sys/compare/v0.4.5...v0.4.6
