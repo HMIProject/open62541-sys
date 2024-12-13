@@ -28,6 +28,9 @@ include = [
   "mbedtls/include/",
   "mbedtls/library/",
   "mbedtls/pkgconfig/",
+  # This file is not actually necessary but its omission causes warnings which
+  # are easy to mistake for build errors.
+  "mbedtls/scripts/config.py",
   "open62541/**/CMakeLists.txt",
   "open62541/arch/",
   "open62541/deps/",
