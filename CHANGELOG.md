@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.9] - 2024-12-13
+
 ### Fixed
 
 - Fix Mbed TLS build on certain macOS versions.
@@ -173,7 +175,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.8...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.9...HEAD
+[0.4.9]: https://github.com/HMIProject/open62541-sys/compare/v0.4.8...v0.4.9
 [0.4.8]: https://github.com/HMIProject/open62541-sys/compare/v0.4.7...v0.4.8
 [0.4.7]: https://github.com/HMIProject/open62541-sys/compare/v0.4.6...v0.4.7
 [0.4.6]: https://github.com/HMIProject/open62541-sys/compare/v0.4.5...v0.4.6
