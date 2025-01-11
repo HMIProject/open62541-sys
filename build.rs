@@ -111,7 +111,7 @@ fn main() {
             is_bitfield: false,
             is_global: false,
         })
-        // Use explicit Rust target version that matches or is older than the entry in `Cargo.toml`.
+        // Use explicit Rust target version that matches the entry in `Cargo.toml`.
         .rust_target(
             bindgen::RustTarget::stable(72, 0)
                 .ok()
