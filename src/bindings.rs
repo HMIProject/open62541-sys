@@ -1,12 +1,17 @@
 // Disable several lints. The auto-generated bindings do not conform to them.
+// TODO: Revisit and revise periodically, especially after changing the MSRV.
 #![allow(clippy::as_conversions)]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::default_trait_access)]
 #![allow(clippy::indexing_slicing)]
 #![allow(clippy::missing_assert_message)]
+#![allow(clippy::missing_const_for_fn)]
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::must_use_candidate)]
+#![allow(clippy::ptr_as_ptr)]
+#![allow(clippy::ptr_offset_with_cast)]
 #![allow(clippy::pub_underscore_fields)]
 #![allow(clippy::semicolon_if_nothing_returned)]
 #![allow(clippy::too_many_lines)]
