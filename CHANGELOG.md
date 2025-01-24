@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Upgrade to open62541 version [1.4.9](https://github.com/open62541/open62541/releases/tag/v1.4.9).
+  This includes <https://github.com/open62541/open62541/pull/7042> that fixes builds on macOS and
+  musl libc targets.
+
 ## [0.4.9] - 2024-12-13
 
 ### Fixed
