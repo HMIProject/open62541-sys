@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Fix builds on GCC 15 with `mbedtls` feature enabled.
+- Fix builds on GCC 15 and Clang 20 when feature flag `mbedtls` is enabled.
 
 ## [0.4.13] - 2025-03-19
 
