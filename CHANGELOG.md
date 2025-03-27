@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.14] - 2025-03-27
+
 ### Fixed
 
 - Fix builds on GCC 15 and Clang 20 when feature flag `mbedtls` is enabled.
@@ -203,7 +205,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.13...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.14...HEAD
+[0.4.14]: https://github.com/HMIProject/open62541-sys/compare/v0.4.13...v0.4.14
 [0.4.13]: https://github.com/HMIProject/open62541-sys/compare/v0.4.12...v0.4.13
 [0.4.12]: https://github.com/HMIProject/open62541-sys/compare/v0.4.11...v0.4.12
 [0.4.11]: https://github.com/HMIProject/open62541-sys/compare/v0.4.10...v0.4.11
