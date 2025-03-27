@@ -237,11 +237,11 @@ fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
 
     // Disable warnings as errors.
     //
-    // On macOS builds use `-mmacosx-version-min` and `--target` options that sometimes
-    // cause a warning that would prevent the build.
+    // On macOS builds use `-mmacosx-version-min` and `--target` options that sometimes cause a
+    // warning that would prevent the build.
     //
-    // Upgrading to a new compiler version might also cause temporary issues that
-    // first need to be fixed upstream.
+    // Upgrading to a new compiler version might also cause temporary issues that first need to be
+    // fixed upstream.
     cmake.define("MBEDTLS_FATAL_WARNINGS", "OFF");
 
     let dst = cmake.build();
