@@ -235,11 +235,14 @@ fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
         // Skip building test programs that we are not going to run anyway.
         .define("ENABLE_TESTING", "OFF");
 
-    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "macos") {
-        // Disable warnings as errors because macOS builds use `-mmacosx-version-min` and `--target`
-        // options that sometimes cause a warning that would prevent the build.
-        cmake.define("MBEDTLS_FATAL_WARNINGS", "OFF");
-    }
+    // Disable warnings as errors.
+    //
+    // On macOS builds use `-mmacosx-version-min` and `--target` options that sometimes cause a
+    // warning that would prevent the build.
+    //
+    // Upgrading to a new compiler version might also cause temporary issues that first need to be
+    // fixed upstream.
+    cmake.define("MBEDTLS_FATAL_WARNINGS", "OFF");
 
     let dst = cmake.build();
 
