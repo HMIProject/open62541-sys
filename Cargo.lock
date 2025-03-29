@@ -148,7 +148,7 @@ dependencies = [
 
 [[package]]
 name = "open62541-sys"
-version = "0.4.14"
+version = "0.4.15"
 dependencies = [
  "bindgen",
  "cc",
