@@ -23,6 +23,7 @@ pub type va_list_ = crate::va_list;
 
 /// Callback type used for [`UA_Logger::log`].
 #[allow(non_camel_case_types)] // Match open62541 type.
+#[allow(non_snake_case)] // Match open62541 type.
 #[doc(hidden)] // Not part of stable, public crate API.
 pub type UA_LoggerLogCallback_ = Option<
     unsafe extern "C" fn(
