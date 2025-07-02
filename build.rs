@@ -70,9 +70,9 @@ fn main() {
     let dst_lib = dst.join(CMAKE_LIB);
 
     if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "windows") {
-        // We require the `Iphlpapi` library on Windows builds to avoid errors (regarding the use of
+        // We require the `iphlpapi` library on Windows builds to avoid errors (regarding the use of
         // `if_nametoindex`, see https://github.com/open62541/open62541/issues/5622).
-        println!("cargo:rustc-link-lib=Iphlpapi");
+        println!("cargo:rustc-link-lib=iphlpapi");
     }
 
     println!("cargo:rustc-link-search={}", dst_lib.display());
