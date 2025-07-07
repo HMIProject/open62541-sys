@@ -304,7 +304,13 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
             // Skip auto-detection and use explicit folders from `mbedtls` build.
             cmake
                 .define("MBEDTLS_FOLDER_INCLUDE", dst.join(CMAKE_INCLUDE))
-                .define("MBEDTLS_FOLDER_LIBRARY", dst.join(CMAKE_LIB));
+                .define("MBEDTLS_FOLDER_LIBRARY", dst.join(CMAKE_LIB))
+                .define("MBEDCRYPTO_INCLUDE_DIRS", dst.join(CMAKE_INCLUDE))
+                .define("MBEDCRYPTO_LIBRARY", dst.join(CMAKE_LIB))
+                .define("MBEDTLS_INCLUDE_DIRS", dst.join(CMAKE_INCLUDE))
+                .define("MBEDTLS_LIBRARY", dst.join(CMAKE_LIB))
+                .define("MBEDX509_INCLUDE_DIRS", dst.join(CMAKE_INCLUDE))
+                .define("MBEDX509_LIBRARY", dst.join(CMAKE_LIB));
             "MBEDTLS"
         }
         Some(EncryptionDst::OpenSsl { .. }) => "OPENSSL",
