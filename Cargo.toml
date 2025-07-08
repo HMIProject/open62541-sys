@@ -58,9 +58,9 @@ include = [
 ]
 
 [build-dependencies]
-bindgen = { version = "0.71.1" }
-cc = "1.2.8"
-cmake = "0.1.52"
+bindgen = { version = "0.72.0" }
+cc = "1.2.29"
+cmake = "0.1.54"
 version_check = "0.9.5"
 
 [features]
@@ -101,7 +101,7 @@ default_trait_access = "warn"
 enum_variant_names = "warn"
 error_impl_error = "warn"
 # We use `expect()` to panic in build script.
-expect_used = "allow"
+ok_expect = "allow"
 fallible_impl_from = "warn"
 format_push_string = "warn"
 get_unwrap = "warn"
