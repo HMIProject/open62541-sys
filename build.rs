@@ -360,9 +360,12 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
         println!("cargo:rerun-if-env-changed={key}");
     }
 
-    fn item_name(&self, original_item_name: &str) -> Option<String> {
+    fn item_name(&self, original_item_name: bindgen::callbacks::ItemInfo<'_>) -> Option<String> {
         // Rename our wrapped custom exports to their intended names.
-        original_item_name.strip_prefix("RS_").map(str::to_owned)
+        original_item_name
+            .name
+            .strip_prefix("RS_")
+            .map(str::to_owned)
     }
 }
 
