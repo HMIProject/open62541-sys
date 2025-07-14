@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Fix cross-compilation with `cross` and `MinGW`.
 
+### Changed
+
+- Upgrade to Mbed TLS version [3.6.4](https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.4).
+
 ## [0.4.16] - 2025-05-30
 
 ### Changed
