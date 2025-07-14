@@ -13,7 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- Fix cross-compilation with `cross` and `MinGW`.
+- Fix cross-compilation with [`cross`](https://github.com/cross-rs/cross) and
+  [`MinGW`](https://mingw.osdn.io).
 
 ## [0.4.16] - 2025-05-30
 
