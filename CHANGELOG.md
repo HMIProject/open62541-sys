@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.17] - 2025-07-15
+
 ### Changed
 
 - Upgrade to Mbed TLS version [3.6.4](https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.4).
@@ -229,7 +231,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.16...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.17...HEAD
+[0.4.17]: https://github.com/HMIProject/open62541-sys/compare/v0.4.16...v0.4.17
 [0.4.16]: https://github.com/HMIProject/open62541-sys/compare/v0.4.15...v0.4.16
 [0.4.15]: https://github.com/HMIProject/open62541-sys/compare/v0.4.14...v0.4.15
 [0.4.14]: https://github.com/HMIProject/open62541-sys/compare/v0.4.13...v0.4.14
