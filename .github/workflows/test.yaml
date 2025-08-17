@@ -66,12 +66,20 @@ jobs:
     runs-on: ${{ matrix.runner_os }}
 
     steps:
-      - name: Adjust build settings for Windows
-        if: contains(matrix.target, '-windows-')
+      - name: Adjust build settings for Windows 2022
+        if: contains(matrix.target, '-windows-2022')
         # Required for Windows builds: for version numbers with pre-release part
         # as suffix, the resulting paths would get too long to build otherwise.
         run: >-
           echo "CARGO_TARGET_DIR=D:\t" >> $env:GITHUB_ENV
+
+      - name: Adjust build settings for Windows 2025 and later
+        if: ${{ contains(matrix.target, '-windows-') && !contains(matrix.target, '-windows-2022') }}
+        # Required for Windows builds: for version numbers with pre-release part
+        # as suffix, the resulting paths would get too long to build otherwise.
+        # Windows 2025 and later do not provision a drive D: <https://github.com/actions/runner-images/issues/12416>
+        run: >-
+          echo "CARGO_TARGET_DIR=C:\t" >> $env:GITHUB_ENV
 
       - name: Install Rust toolchain
         # Use specific Rust version that is the minimum supported `rust-version`
