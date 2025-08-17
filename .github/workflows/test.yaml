@@ -134,9 +134,11 @@ jobs:
       # `cargo-hack`.
       - name: Run doctests with all features enabled
         run: >-
-          cargo test --locked --all-features
+          cargo test
+          --locked --all-features
           --doc
 
       - name: Build package with all features enabled
         run: >-
-          cargo package --locked --all-features
+          cargo package
+          --locked --all-features
