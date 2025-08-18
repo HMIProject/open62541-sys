@@ -238,7 +238,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.17...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.4.18...HEAD
+[0.4.18]: https://github.com/HMIProject/open62541-sys/compare/v0.4.17...v0.4.18
 [0.4.17]: https://github.com/HMIProject/open62541-sys/compare/v0.4.16...v0.4.17
 [0.4.16]: https://github.com/HMIProject/open62541-sys/compare/v0.4.15...v0.4.16
 [0.4.15]: https://github.com/HMIProject/open62541-sys/compare/v0.4.14...v0.4.15
