@@ -51,9 +51,9 @@ fn has_custom_exports() {
     //
     use open62541_sys::{vsnprintf_va_copy, vsnprintf_va_end, UA_EMPTY_ARRAY_SENTINEL};
 
-    #[allow(clippy::no_effect_underscore_binding)] // Check existence of binding.
+    #[expect(clippy::no_effect_underscore_binding, reason = "check existence")]
     let _unused = vsnprintf_va_copy;
-    #[allow(clippy::no_effect_underscore_binding)] // Check existence of binding.
+    #[expect(clippy::no_effect_underscore_binding, reason = "check existence")]
     let _unused = vsnprintf_va_end;
     let _unused = unsafe { UA_EMPTY_ARRAY_SENTINEL };
 }

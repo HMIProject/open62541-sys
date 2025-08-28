@@ -1,4 +1,4 @@
-#![allow(clippy::panic)] // Panic only during build time.
+#![expect(clippy::panic, reason = "panic only during build time")]
 
 use std::{
     env,
@@ -112,8 +112,11 @@ fn main() {
             is_global: false,
         })
         // Use explicit Rust target version that matches the entry in `Cargo.toml`.
+        //
+        // TODO: Revert back to matching version. For now, the generated code seems to be broken for
+        // `stable(81, 0)` and newer. Using on older version than the MSRV is okay.
         .rust_target(
-            bindgen::RustTarget::stable(72, 0)
+            bindgen::RustTarget::stable(80, 0)
                 .ok()
                 .expect("should be a valid Rust target"),
         )

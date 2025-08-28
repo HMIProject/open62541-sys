@@ -21,7 +21,7 @@ use open62541_sys::{
 
 #[test]
 fn create_and_destroy_client() {
-    // This does not actualy connect to anything.
+    // This does not actually connect to anything.
     let client = unsafe { UA_Client_new() };
     unsafe { UA_Client_delete(client) };
 }
