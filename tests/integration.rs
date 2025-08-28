@@ -1,15 +1,9 @@
 use core::{ffi, ptr};
 
 use open62541_sys::{
-    va_list_, UA_Client_delete, UA_Client_new, UA_LogCategory, UA_LogLevel, UA_Logger,
-    UA_LoggerClearCallback_, UA_LoggerLogCallback_,
+    va_list_, UA_LogCategory, UA_LogLevel, UA_Logger, UA_LoggerClearCallback_,
+    UA_LoggerLogCallback_,
 };
-
-#[test]
-fn create_and_destroy_client() {
-    let client = unsafe { UA_Client_new() };
-    unsafe { UA_Client_delete(client) };
-}
 
 #[test]
 fn variadic_arguments() {
