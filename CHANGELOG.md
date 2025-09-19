@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Breaking: Bump Minimum Supported Rust Version (MSRV) to 1.85 (Edition 2024).
+
 ## [0.4.18] - 2025-08-18
 
 ### Changed
