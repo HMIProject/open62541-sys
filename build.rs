@@ -2,8 +2,6 @@
 
 use std::{
     env,
-    fs::File,
-    io::{self, Write as _},
     path::{Path, PathBuf},
 };
 
@@ -19,16 +17,6 @@ const LIB_BASE: &str = "open62541";
 /// compilation of static (inline) functions from `open62541` itself. This may be an arbitrary name;
 /// the `cc` build adds it as `rustc-link-lib` automatically.
 const LIB_EXT: &str = "open62541-ext";
-
-/// Pattern to search for compatibility with Edition 2024.
-///
-/// See also [`LEGACY_EXTERN_REPLACEMENT`].
-const LEGACY_EXTERN_PATTERN: &str = r#"extern "C" {"#;
-
-/// Replacement to use for compatibility with Edition 2024.
-///
-/// See also [`LEGACY_EXTERN_PATTERN`].
-const LEGACY_EXTERN_REPLACEMENT: &str = r#"unsafe extern "C" {"#;
 
 fn main() {
     let with_mbedtls =
@@ -112,11 +100,8 @@ fn main() {
             is_global: false,
         })
         // Use explicit Rust target version that matches the entry in `Cargo.toml`.
-        //
-        // TODO: Revert back to matching version. For now, the generated code seems to be broken for
-        // `stable(81, 0)` and newer. Using on older version than the MSRV is okay.
         .rust_target(
-            bindgen::RustTarget::stable(80, 0)
+            bindgen::RustTarget::stable(85, 0)
                 .ok()
                 .expect("should be a valid Rust target"),
         )
@@ -149,19 +134,6 @@ fn main() {
     bindings
         .write_to_file(out_bindings_rs.clone())
         .expect("should write `bindings.rs`");
-
-    // Until <https://github.com/rust-lang/rust-bindgen/issues/2901> is resolved, we replace `extern
-    // "C"` with `unsafe extern "C"` manually here. Remove this when `bindgen` is able to do it.
-    if version_check::is_min_version("1.82.0") == Some(true) {
-        // We can only use `unsafe extern` starting with Rust 1.82.0. See
-        // <https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#safe-items-with-unsafe-extern>.
-        replace_in_file(
-            &out_bindings_rs,
-            LEGACY_EXTERN_PATTERN,
-            LEGACY_EXTERN_REPLACEMENT,
-        )
-        .expect("should add unsafe to extern statements");
-    }
 
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
     // link in addition to the base `open62541` library.
@@ -370,18 +342,4 @@ impl bindgen::callbacks::ParseCallbacks for CustomCallbacks {
             .strip_prefix("RS_")
             .map(str::to_owned)
     }
-}
-
-/// Replaces all occurrences of pattern in file.
-///
-/// Note that this is not particularly efficient because it reads the entire file into memory before
-/// writing it back. Care should be taken when operating on large files.
-fn replace_in_file(path: &Path, pattern: &str, replacement: &str) -> io::Result<()> {
-    let buf = io::read_to_string(File::open(path)?)?;
-
-    let buf = buf.replace(pattern, replacement);
-
-    File::create(path)?.write_all(buf.as_bytes())?;
-
-    Ok(())
 }

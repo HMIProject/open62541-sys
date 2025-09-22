@@ -2,8 +2,8 @@ use std::{
     ffi::CString,
     slice, str,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
     thread,
     time::Duration,
@@ -11,12 +11,12 @@ use std::{
 
 use open62541_sys::{
     UA_Array_copy, UA_Array_delete, UA_Client, UA_Client_connect, UA_Client_delete,
-    UA_Client_disconnect, UA_Client_new, UA_Client_readValueAttribute, UA_DataType, UA_Server,
-    UA_ServerConfig, UA_Server_delete, UA_Server_getConfig, UA_Server_new, UA_Server_run_iterate,
-    UA_Server_run_shutdown, UA_Server_run_startup, UA_String, UA_String_clear, UA_String_delete,
-    UA_String_fromChars, UA_String_new, UA_Variant, UA_Variant_delete, UA_Variant_new, UA_print,
+    UA_Client_disconnect, UA_Client_new, UA_Client_readValueAttribute, UA_DataType,
     UA_NODEID_NUMERIC, UA_NS0ID_SERVER_SERVERSTATUS_BUILDINFO_PRODUCTNAME, UA_STATUSCODE_GOOD,
-    UA_TYPES, UA_TYPES_STRING, UA_TYPES_VARIANT,
+    UA_Server, UA_Server_delete, UA_Server_getConfig, UA_Server_new, UA_Server_run_iterate,
+    UA_Server_run_shutdown, UA_Server_run_startup, UA_ServerConfig, UA_String, UA_String_clear,
+    UA_String_delete, UA_String_fromChars, UA_String_new, UA_TYPES, UA_TYPES_STRING,
+    UA_TYPES_VARIANT, UA_Variant, UA_Variant_delete, UA_Variant_new, UA_print,
 };
 
 #[test]

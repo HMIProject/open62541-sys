@@ -1,8 +1,8 @@
 use core::{ffi, ptr};
 
 use open62541_sys::{
-    va_list_, UA_LogCategory, UA_LogLevel, UA_Logger, UA_LoggerClearCallback_,
-    UA_LoggerLogCallback_,
+    UA_LogCategory, UA_LogLevel, UA_Logger, UA_LoggerClearCallback_, UA_LoggerLogCallback_,
+    va_list_,
 };
 
 #[test]
@@ -49,7 +49,7 @@ fn has_custom_exports() {
     // Make sure that our custom exports (prefixed internally with `RS_`) are available under their
     // expected names.
     //
-    use open62541_sys::{vsnprintf_va_copy, vsnprintf_va_end, UA_EMPTY_ARRAY_SENTINEL};
+    use open62541_sys::{UA_EMPTY_ARRAY_SENTINEL, vsnprintf_va_copy, vsnprintf_va_end};
 
     #[expect(clippy::no_effect_underscore_binding, reason = "check existence")]
     let _unused = vsnprintf_va_copy;
