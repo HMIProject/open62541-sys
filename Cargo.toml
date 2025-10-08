@@ -16,6 +16,7 @@ categories = ["network-programming", "embedded", "external-ffi-bindings"]
 include = [
   "CHANGELOG.md",
   "README.md",
+  "LICENSES/MPL-2.0.txt",
   "build.rs",
   "src/",
   "wrapper.c",
