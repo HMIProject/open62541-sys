@@ -271,6 +271,17 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
     }
 
+    if matches!(env::var("CARGO_BUILD_TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
+        // Disable LTO on for x86_64-unknown-linux-gnu.
+        //
+        // Rust projects may use different linkers on x86_64-unknown-linux-gnu.
+        // Either BFD or LLD. The latter is the default linker since Rust 1.90.
+        // Unfortunately both linkers use incompatible bitcode formats.
+        //
+        // See also: <https://github.com/HMIProject/open62541/issues/288#issuecomment-3390812041>
+        cmake.define("CMAKE_INTERPROCEDURAL_OPTIMIZATION", "OFF");
+    }
+
     // When enabled, we build `open62541` with encryption support. This changes the library and also
     // changes the resulting `bindings.rs`.
     let encryption = match encryption {
