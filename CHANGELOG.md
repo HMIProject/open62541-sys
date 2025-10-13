@@ -11,6 +11,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Breaking: Bump Minimum Supported Rust Version (MSRV) to 1.85 (Edition 2024).
 
+### Fixed
+
+- Disable LTO on `x86_64-unknown-linux-gnu` to fix unresolved symbols when linking with `lld`
+  (default in Rust 1.90).
+
 ## [0.4.18] - 2025-08-18
 
 ### Changed
