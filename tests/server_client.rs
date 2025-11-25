@@ -1,3 +1,5 @@
+#![expect(clippy::unwrap_in_result, reason = "test module")]
+
 use std::{
     ffi::CString,
     slice, str,
