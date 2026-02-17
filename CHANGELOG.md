@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-02-17
+
 ### Changed
 
 - Upgrade to open62541 version
@@ -262,7 +264,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/HMIProject/open62541-sys/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/HMIProject/open62541-sys/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/HMIProject/open62541-sys/compare/v0.4.18...v0.5.0
 [0.4.18]: https://github.com/HMIProject/open62541-sys/compare/v0.4.17...v0.4.18
