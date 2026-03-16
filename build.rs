@@ -271,8 +271,8 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
     }
 
-    if matches!(env::var("CARGO_BUILD_TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
-        // Disable LTO on for x86_64-unknown-linux-gnu.
+    if matches!(env::var("TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
+        // Disable LTO for x86_64-unknown-linux-gnu.
         //
         // Rust projects may use different linkers on x86_64-unknown-linux-gnu.
         // Either BFD or LLD. The latter is the default linker since Rust 1.90.
