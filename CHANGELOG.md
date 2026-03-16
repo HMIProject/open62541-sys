@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Disable LTO on `x86_64-unknown-linux-gnu` to fix unresolved symbols when linking with `lld`
+  (default in Rust 1.90). This didn't work as expected since v0.5.0.
+
 ## [0.5.3] - 2026-02-23
 
 ### Changed
