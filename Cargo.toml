@@ -59,7 +59,7 @@ include = [
 
 [build-dependencies]
 bindgen = { version = "0.72.1" }
-cc = "1.2.56"
+cc = "1.2.57"
 cmake = "0.1.57"
 version_check = "0.9.5"
 
