@@ -5,9 +5,9 @@ use open62541_sys::{
     va_list_,
 };
 
+// Check validity of explicitly defined type aliases.
 #[test]
-fn variadic_arguments() {
-    // Check if `va_list_` type matches.
+fn type_aliases() {
     const unsafe extern "C" fn log_c(
         _log_context: *mut ffi::c_void,
         _level: UA_LogLevel,
@@ -15,26 +15,13 @@ fn variadic_arguments() {
         _msg: *const ffi::c_char,
         _args: va_list_,
     ) {
+        // Nothing here.
     }
-    let _logger = UA_Logger {
-        log: Some(log_c),
-        context: ptr::null_mut(),
-        clear: None,
-    };
-}
 
-#[test]
-fn logger_types() {
-    // Check validity of type aliases for `UA_Logger` callbacks.
-    const unsafe extern "C" fn log_c(
-        _log_context: *mut ffi::c_void,
-        _level: UA_LogLevel,
-        _category: UA_LogCategory,
-        _msg: *const ffi::c_char,
-        _args: va_list_,
-    ) {
+    const unsafe extern "C" fn clear_c(_logger: *mut UA_Logger) {
+        // Nothing here.
     }
-    const unsafe extern "C" fn clear_c(_logger: *mut UA_Logger) {}
+
     let log: UA_LoggerLogCallback_ = Some(log_c);
     let clear: UA_LoggerClearCallback_ = Some(clear_c);
     let _logger = UA_Logger {
@@ -44,16 +31,11 @@ fn logger_types() {
     };
 }
 
+// Make sure that our custom exports (prefixed with `RS_`) are available under their expected names,
+// i.e. without the `RS_` prefix.
 #[test]
-fn has_custom_exports() {
-    // Make sure that our custom exports (prefixed internally with `RS_`) are available under their
-    // expected names.
-    //
-    use open62541_sys::{UA_EMPTY_ARRAY_SENTINEL, vsnprintf_va_copy, vsnprintf_va_end};
+fn custom_exports() {
+    use open62541_sys::UA_EMPTY_ARRAY_SENTINEL;
 
-    #[expect(clippy::no_effect_underscore_binding, reason = "check existence")]
-    let _unused = vsnprintf_va_copy;
-    #[expect(clippy::no_effect_underscore_binding, reason = "check existence")]
-    let _unused = vsnprintf_va_end;
     let _unused = unsafe { UA_EMPTY_ARRAY_SENTINEL };
 }
