@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Upgrade to Mbed TLS v3.6.6
+- Upgrade to Mbed TLS version [3.6.6](https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.6).
 
 ## [0.5.4] - 2026-03-16
 
