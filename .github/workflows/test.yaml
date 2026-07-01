@@ -53,8 +53,10 @@ jobs:
 
           - target: armv7-unknown-linux-gnueabihf
             runner_os: ubuntu-24.04
-          - target: armv7-unknown-linux-gnueabihf
-            runner_os: ubuntu-26.04
+          # Build on Ubuntu 26.04 fails: <https://github.com/Mbed-TLS/mbedtls/issues/9875>
+          # TODO: Re-enable when fixed.
+          #- target: armv7-unknown-linux-gnueabihf
+          #  runner_os: ubuntu-26.04
 
           - target: x86_64-apple-darwin
             runner_os: macos-15-intel
