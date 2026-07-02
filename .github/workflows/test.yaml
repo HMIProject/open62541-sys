@@ -94,8 +94,10 @@ jobs:
       - name: Install Rust toolchain
         # Use specific Rust version that is the minimum supported `rust-version`
         # (MSRV) from `Cargo.toml`.
-        uses: dtolnay/rust-toolchain@1.85
+        # Specify the Rust toolchain explicitly to prevent issues with Dependabot.
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: "1.85"
           targets: ${{ matrix.target }}
 
       - name: Install cross-compilation tools
