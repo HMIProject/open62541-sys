@@ -35,10 +35,18 @@ jobs:
         include:
           - target: aarch64-apple-darwin
             runner_os: macos-latest
+          - target: aarch64-unknown-linux-gnu
+            runner_os: ubuntu-latest
+          - target: aarch64-unknown-linux-musl
+            runner_os: ubuntu-latest
+          - target: aarch64-pc-windows-msvc
+            # There is no windows-latest-arm runner.
+            runner_os: windows-11-arm
           - target: armv7-unknown-linux-gnueabihf
             runner_os: ubuntu-latest
           - target: x86_64-apple-darwin
-            runner_os: macos-latest
+            # There is no macos-intel-latest runner.
+            runner_os: macos-26-intel
           - target: x86_64-pc-windows-msvc
             runner_os: windows-latest
           - target: x86_64-unknown-linux-gnu
@@ -84,7 +92,7 @@ jobs:
       # Check out the repository before the remaining steps that depend on it.
       # All preceding steps are independent of the repository contents.
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
           submodules: recursive
