@@ -75,6 +75,19 @@ fn main() {
         encryption_dst.rustc_link_lib();
     }
 
+    if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
+        // Link `libgcc` to resolve `__gcc_personality_v0`. GCC-compiled `open62541` C files that
+        // use GCC's cleanup attribute emit a `DW.ref.__gcc_personality_v0` reference in a
+        // `.data.rel.local` section. This symbol lives in `libgcc.a`, which is part of the GCC
+        // runtime for the musl cross-toolchain. Rust's musl linker passes `-nodefaultlibs` and
+        // does not include `libgcc` automatically.
+        //
+        // IMPORTANT: This directive must appear *after* `cargo:rustc-link-lib=open62541` so that
+        // the static linker processes `-lgcc` after `-lopen62541`. With static archive linking,
+        // the library providing a symbol must be listed *after* the library that references it.
+        println!("cargo:rustc-link-lib=gcc");
+    }
+
     let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
 
     // Get derived paths relative to `out`.
@@ -296,13 +309,6 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         )
         .expect("should write bits/stdio_lim.h shim for musl compatibility");
         cmake.cflag(format!("-idirafter{}", out.join("include-shim").display()));
-
-        // Suppress DWARF asynchronous unwind tables (`-fno-asynchronous-unwind-tables`) to
-        // prevent GCC from generating `.eh_frame` sections in `open62541` object files. Those
-        // sections contain a `DW.ref.__gcc_personality_v0` reference that lives in `libgcc_eh.a`.
-        // Rust's musl linker uses `-nodefaultlibs` and does not include `libgcc_eh` automatically,
-        // causing an "undefined reference to `__gcc_personality_v0'" link error.
-        cmake.cflag("-fno-asynchronous-unwind-tables");
     }
 
     if matches!(env::var("TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
