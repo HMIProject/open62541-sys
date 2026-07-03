@@ -297,10 +297,12 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         .expect("should write bits/stdio_lim.h shim for musl compatibility");
         cmake.cflag(format!("-idirafter{}", out.join("include-shim").display()));
 
-        // Link against `libgcc` to provide `__gcc_personality_v0` which is referenced by
-        // `open62541` object files compiled with GCC's DWARF exception handling. Rust's musl
-        // linker uses `-nodefaultlibs` and does not include `libgcc` automatically.
-        println!("cargo:rustc-link-lib=gcc");
+        // Suppress DWARF asynchronous unwind tables (`-fno-asynchronous-unwind-tables`) to
+        // prevent GCC from generating `.eh_frame` sections in `open62541` object files. Those
+        // sections contain a `DW.ref.__gcc_personality_v0` reference that lives in `libgcc_eh.a`.
+        // Rust's musl linker uses `-nodefaultlibs` and does not include `libgcc_eh` automatically,
+        // causing an "undefined reference to `__gcc_personality_v0'" link error.
+        cmake.cflag("-fno-asynchronous-unwind-tables");
     }
 
     if matches!(env::var("TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
