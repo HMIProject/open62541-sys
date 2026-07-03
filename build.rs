@@ -255,6 +255,13 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         // Explicitly set C11 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "11")
+        // Override default value `ON` of `UA_ENABLE_DEBUG_SANITIZER`.
+        // When the build type is Debug (which is what Cargo uses for test/debug builds) on UNIX with Clang,
+        // it automatically appends -fsanitize=address,undefined -fno-omit-frame-pointer to all C compiler flags.
+        // This causes libopen62541.a to be compiled with ASAN+UBSAN instrumentation. The Rust toolchain then
+        // fails to link the test binary because the Apple Clang sanitizer runtime (libclang_rt.asan_osx_dynamic.dylib etc.)
+        // is not linked.
+        .define("UA_ENABLE_DEBUG_SANITIZER", "OFF");
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
