@@ -1,7 +1,7 @@
 #![expect(clippy::panic, reason = "panic only during build time")]
 
 use std::{
-    env,
+    env, fs,
     path::{Path, PathBuf},
 };
 
@@ -91,7 +91,9 @@ fn main() {
         // Include our wrapper vars.
         .allowlist_var("(__)?RS_.*")
         .allowlist_var("(__)?UA_.*")
-        // Building `open62541` 1.5.x requires C11.
+        // Explicitly set C11 standard. C11 is required for `<stdatomic.h>` with types like
+        // `atomic_uintptr_t` used in `open62541` headers. C11 also forces Windows variants of
+        // `vsnprintf()` to conform to the standard (as it is a superset of C99).
         .clang_arg("-std=c11")
         .clang_arg(format!("-I{}", dst_include.display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
@@ -275,6 +277,25 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         cmake
             .cflag("-idirafter/usr/include")
             .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
+
+        // Provide a shim for `<bits/stdio_lim.h>` which is a glibc-specific header that is not
+        // available in musl libc. `open62541` includes it directly in `eventloop_posix.h`. The
+        // standard constants it would define are already provided by standard headers (`<stdio.h>`
+        // and `<limits.h>`) that are included before this file in the same translation unit.
+        let out = PathBuf::from(env::var("OUT_DIR").expect("should have OUT_DIR"));
+        let shim_bits_dir = out.join("include-shim").join("bits");
+        fs::create_dir_all(&shim_bits_dir)
+            .expect("should create shim include directory for musl compatibility");
+        fs::write(
+            shim_bits_dir.join("stdio_lim.h"),
+            "/* Shim for musl libc compatibility.\n\
+             * The glibc-specific <bits/stdio_lim.h> is not available in musl libc.\n\
+             * The constants it defines are already provided by the standard headers\n\
+             * (<stdio.h> and <limits.h>) included earlier in the same translation unit.\n\
+             */\n",
+        )
+        .expect("should write bits/stdio_lim.h shim for musl compatibility");
+        cmake.cflag(format!("-idirafter{}", out.join("include-shim").display()));
     }
 
     if matches!(env::var("TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
