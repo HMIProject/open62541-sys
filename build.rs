@@ -136,7 +136,7 @@ fn main() {
         // `__has_include` may not be defined as a preprocessor macro (it is a built-in operator),
         // so the include is silently skipped and the symbols remain undeclared. Clang 18+ promotes
         // such implicit-function-declaration warnings to hard errors, causing bindgen to panic.
-        builder = builder.clang_arg("-include stdatomic.h");
+        builder = builder.clang_arg("-include").clang_arg("stdatomic.h");
     }
 
     let bindings = builder
