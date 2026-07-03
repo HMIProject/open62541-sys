@@ -40,8 +40,10 @@ jobs:
 
           - target: aarch64-unknown-linux-gnu
             runner_os: ubuntu-24.04-arm
-          - target: aarch64-unknown-linux-gnu
-            runner_os: ubuntu-26.04-arm
+          # Build on Ubuntu 26.04 fails with "unknown type name 'atomic_uintptr_t'"."
+          # TODO: Re-enable when fixed.
+          #- target: aarch64-unknown-linux-gnu
+          #  runner_os: ubuntu-26.04-arm
 
           - target: aarch64-unknown-linux-musl
             runner_os: ubuntu-24.04-arm
@@ -70,8 +72,10 @@ jobs:
 
           - target: x86_64-unknown-linux-gnu
             runner_os: ubuntu-24.04
-          - target: x86_64-unknown-linux-gnu
-            runner_os: ubuntu-26.04
+          # Build on Ubuntu 26.04 fails with "unknown type name 'atomic_uintptr_t'"."
+          # TODO: Re-enable when fixed.
+          #- target: x86_64-unknown-linux-gnu
+          #  runner_os: ubuntu-26.04
 
           - target: x86_64-unknown-linux-musl
             runner_os: ubuntu-24.04
