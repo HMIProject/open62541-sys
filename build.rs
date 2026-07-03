@@ -81,7 +81,7 @@ fn main() {
     let out_bindings_rs = out.join("bindings.rs");
     let out_extern_c = out.join("extern.c");
 
-    let builder = bindgen::Builder::default()
+    let mut builder = bindgen::Builder::default()
         // Include our wrapper functions.
         .allowlist_function("(__)?RS_.*")
         .allowlist_function("(__)?UA_.*")
@@ -127,6 +127,17 @@ fn main() {
         // Make sure to specify the location of the resulting `extern.c`. By default `bindgen` would
         // place it in the temporary directory.
         .wrap_static_fns_path(out_extern_c.to_str().expect("should be valid path"));
+
+    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "linux") {
+        // Force-include `<stdatomic.h>` on Linux before parsing any `open62541` headers.
+        // `open62541/config.h` uses C11 atomic functions (`atomic_exchange`, `atomic_load`, etc.)
+        // and the type `atomic_uintptr_t` that require `<stdatomic.h>`.  The include guard in
+        // `config.h.in` relies on `defined(__has_include)`, but in strict clang C11 mode
+        // `__has_include` may not be defined as a preprocessor macro (it is a built-in operator),
+        // so the include is silently skipped and the symbols remain undeclared. Clang 18+ promotes
+        // such implicit-function-declaration warnings to hard errors, causing bindgen to panic.
+        builder = builder.clang_arg("-include stdatomic.h");
+    }
 
     let bindings = builder
         .generate()
@@ -276,7 +287,14 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         // TODO: Remove this when `open62541` enables us to build without including Linux headers.
         cmake
             .cflag("-idirafter/usr/include")
-            .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"));
+            .cflag(format!("-idirafter/usr/include/{arch}-linux-gnu"))
+            // Disable asynchronous DWARF unwind tables.  The musl cross-compiler toolchains
+            // (e.g. `aarch64-linux-musl-gcc` 9.4.0) ship without `libgcc_eh`, so any object file
+            // that references `__gcc_personality_v0` (produced by GCC when it emits `.eh_frame`
+            // sections) causes an "undefined reference" link error when Rust links the final test
+            // binary.  Disabling async unwind tables removes those references from the compiled
+            // `open62541` objects while preserving call-site unwind information.
+            .cflag("-fno-asynchronous-unwind-tables");
 
         // Provide a shim for `<bits/stdio_lim.h>` which is a glibc-specific header that is not
         // available in musl libc. `open62541` includes it directly in `eventloop_posix.h`. The
