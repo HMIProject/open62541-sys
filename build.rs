@@ -296,6 +296,11 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         )
         .expect("should write bits/stdio_lim.h shim for musl compatibility");
         cmake.cflag(format!("-idirafter{}", out.join("include-shim").display()));
+
+        // Link against `libgcc` to provide `__gcc_personality_v0` which is referenced by
+        // `open62541` object files compiled with GCC's DWARF exception handling. Rust's musl
+        // linker uses `-nodefaultlibs` and does not include `libgcc` automatically.
+        println!("cargo:rustc-link-lib=gcc");
     }
 
     if matches!(env::var("TARGET"), Ok(env) if env == "x86_64-unknown-linux-gnu") {
