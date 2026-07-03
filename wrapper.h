@@ -1,3 +1,13 @@
+#if defined(__linux__)
+// Ensure Linux extension declarations are visible in strict C modes while bindgen parses
+// open62541 headers. `config.h` requires pthread recursive mutex APIs/macros.
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+#include <pthread.h>
+#include <stdatomic.h>
+#endif
+
 #include <open62541/types.h>
 #include <open62541/client.h>
 #include <open62541/client_config_default.h>

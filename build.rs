@@ -293,8 +293,10 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
             // that references `__gcc_personality_v0` (produced by GCC when it emits `.eh_frame`
             // sections) causes an "undefined reference" link error when Rust links the final test
             // binary.  Disabling async unwind tables removes those references from the compiled
-            // `open62541` objects while preserving call-site unwind information.
-            .cflag("-fno-asynchronous-unwind-tables");
+            // `open62541` objects. Disable both async and regular unwind table generation to avoid
+            // emitting personality references with older musl GCC toolchains.
+            .cflag("-fno-asynchronous-unwind-tables")
+            .cflag("-fno-unwind-tables");
 
         // Provide a shim for `<bits/stdio_lim.h>` which is a glibc-specific header that is not
         // available in musl libc. `open62541` includes it directly in `eventloop_posix.h`. The
