@@ -91,9 +91,8 @@ fn main() {
         // Include our wrapper vars.
         .allowlist_var("(__)?RS_.*")
         .allowlist_var("(__)?UA_.*")
-        // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
-        // standard. This also matches the expected (or supported) C standard of `open62541` itself.
-        .clang_arg("-std=c99")
+        // Building `open62541` 1.5.x requires C11.
+        .clang_arg("-std=c11")
         .clang_arg(format!("-I{}", dst_include.display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
             is_bitfield: false,
@@ -253,9 +252,9 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
-        // Explicitly set C99 standard to force Windows variants of `vsnprintf()` to conform to this
+        // Explicitly set C11 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
-        .define("C_STANDARD", "99")
+        .define("C_STANDARD", "11")
         // Python defaults to creating bytecode in `__pycache__` directories. During build, this may
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
