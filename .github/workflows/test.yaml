@@ -152,7 +152,6 @@ jobs:
       # certain features only for some doctests, so we run them without
       # `cargo-hack`.
       - name: Run doctests with all features enabled
-        # Disable build for GNU targets on Ubuntu 22.04 (unsupported `atomic_uintptr_t`).
         # Disable tests for musl libc target(s) due to build failure for unknown reasons.
         # TODO: Try to re-enable this step regardless of the build target in the future.
         if: ${{ !endsWith(matrix.target, '-musl') }}
@@ -162,8 +161,7 @@ jobs:
           --doc
 
       - name: Build package with all features enabled
-        # Disable build for GNU targets on Ubuntu 22.04 (unsupported `atomic_uintptr_t`).
-        # TODO: Try to re-enable this step regardless of the build target in the future.
+        # Only package musl libc target(s); other targets use `Run tests` above.
         if: endsWith(matrix.target, '-musl')
         run: >-
           cargo package
