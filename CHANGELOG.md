@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-07-09
+
 ### Fixed
 
 - Fix Linux musl and aarch64 builds.
@@ -290,7 +292,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - First public release.
 
-[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/HMIProject/open62541-sys/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/HMIProject/open62541-sys/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/HMIProject/open62541-sys/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/HMIProject/open62541-sys/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/HMIProject/open62541-sys/compare/v0.5.2...v0.5.3
