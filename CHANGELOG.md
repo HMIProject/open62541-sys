@@ -12,6 +12,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Breaking: Upgrade to open62541 version
   [1.5.5](https://github.com/open62541/open62541/releases/tag/v1.5.5).
 
+## [Unreleased (release/0.5.x)]
+
+### Fixed
+
+- Fix Linux musl and aarch64 builds.
+
 ## [0.5.5] - 2026-07-02
 
 ### Changed
