@@ -217,8 +217,8 @@ fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
         .define("CMAKE_INSTALL_INCLUDEDIR", CMAKE_INCLUDE)
         // Some systems (Fedora) default to `lib64/` instead of `lib/` for 64-bit libraries.
         .define("CMAKE_INSTALL_LIBDIR", CMAKE_LIB)
-        // Use same C99 standard as is used for building `open62541`.
-        .define("C_STANDARD", "99")
+        // Use same C11 standard as is used for building `open62541`.
+        .define("C_STANDARD", "11")
         // Skip building binary programs unnecessary for linking library.
         .define("ENABLE_PROGRAMS", "OFF")
         // Skip building test programs that we are not going to run anyway.
