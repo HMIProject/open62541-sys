@@ -37,10 +37,12 @@ jobs:
             runner_os: macos-latest
           - target: aarch64-unknown-linux-gnu
             # There is no ubuntu-latest-arm runner.
-            runner_os: ubuntu-26.04-arm
+            # TODO: Replace with ubuntu-26.04-arm when the build is fixed.
+            runner_os: ubuntu-24.04-arm
           - target: aarch64-unknown-linux-musl
             # There is no ubuntu-latest-arm runner.
-            runner_os: ubuntu-26.04-arm
+            # TODO: Replace with ubuntu-26.04-arm when the build is fixed.
+            runner_os: ubuntu-24.04-arm
           - target: aarch64-pc-windows-msvc
             # There is no windows-latest-arm runner.
             runner_os: windows-11-arm

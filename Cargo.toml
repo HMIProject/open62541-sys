@@ -1,11 +1,11 @@
 [package]
 name = "open62541-sys"
-version = "0.5.6"
+version = "0.6.0"
 authors = ["HMI Project"]
 edition = "2024"
 # Keep MSRV in sync with `test.yaml`/`build.rs`. Use versions that are at least 6 months old.
 rust-version = "1.85"
-description = "Low-level, unsafe bindings for the C99 library open62541, an open source and free implementation of OPC UA (OPC Unified Architecture)."
+description = "Low-level, unsafe bindings for the C11 library open62541, an open source and free implementation of OPC UA (OPC Unified Architecture)."
 documentation = "https://docs.rs/open62541-sys"
 readme = "README.md"
 homepage = "https://github.com/HMIProject/open62541-sys"
