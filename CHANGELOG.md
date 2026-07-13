@@ -12,6 +12,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Breaking: Upgrade to open62541 version
   [1.5.5](https://github.com/open62541/open62541/releases/tag/v1.5.5).
 - Breaking: Remove custom exports `vsnprintf_va_copy()` and `vsnprintf_va_end()`.
+
 ## [Unreleased (release/0.5.x)]
 
 ### Fixed
