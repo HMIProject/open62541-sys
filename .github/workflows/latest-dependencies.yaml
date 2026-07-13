@@ -111,6 +111,11 @@ jobs:
         run: >-
           cargo update --verbose
 
+      - name: Build with feature combinations
+        run: >-
+          cargo hack --each-feature
+          build --locked
+
       - name: Run tests (bins/lib/tests/examples) with feature combinations
         run: >-
           cargo hack --each-feature
