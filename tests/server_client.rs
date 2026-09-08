@@ -1,4 +1,4 @@
-#![expect(clippy::unwrap_in_result, reason = "test module")]
+#![allow(clippy::unwrap_in_result, reason = "test module")] // `allow` for Rust 1.85
 
 use std::{
     ffi::CString,
