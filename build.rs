@@ -18,6 +18,27 @@ const LIB_BASE: &str = "open62541";
 /// the `cc` build adds it as `rustc-link-lib` automatically.
 const LIB_EXT: &str = "open62541-ext";
 
+/// C compiler flags for building native code with ASAN (address sanitizer).
+const ASAN_FLAGS: &[&str] = &["-fsanitize=address", "-fno-omit-frame-pointer"];
+
+/// Returns C compiler flags for sanitizers enabled in the Rust build.
+///
+/// Native code is instrumented only when the Rust code is (with `-Zsanitizer=address`, which sets
+/// `cfg(sanitize = "address")`). This ensures that the sanitizer runtime is linked into the final
+/// artifact, which the instrumented native code depends on.
+///
+/// The runtime comes from the LLVM bundled with Rust. When the C compiler does not match it, linking
+/// fails with an unresolved `__asan_version_mismatch_check_*` symbol. We deliberately do not disable
+/// this check; see `README.md` for how to select a matching C compiler instead.
+fn sanitizer_flags() -> &'static [&'static str] {
+    let sanitize = env::var("CARGO_CFG_SANITIZE").unwrap_or_default();
+    if sanitize.split(',').any(|sanitizer| sanitizer == "address") {
+        ASAN_FLAGS
+    } else {
+        &[]
+    }
+}
+
 fn main() {
     let with_mbedtls =
         matches!(env::var("CARGO_FEATURE_MBEDTLS"), Ok(mbedtls) if !mbedtls.is_empty());
@@ -44,14 +65,16 @@ fn main() {
     println!("cargo:rerun-if-changed={}", src_wrapper_c.display());
     println!("cargo:rerun-if-changed={}", src_wrapper_h.display());
 
+    let sanitizer_flags = sanitizer_flags();
+
     // Build related encryption libraries.
     let encryption_dst = encryption.map(|encryption| match encryption {
-        Encryption::MbedTls => prepare_mbedtls(src_mbedtls),
+        Encryption::MbedTls => prepare_mbedtls(src_mbedtls, sanitizer_flags),
         Encryption::OpenSsl => prepare_openssl(),
     });
 
     // Build `open62541` library.
-    let dst = build_open62541(src_open62541, encryption_dst.as_ref());
+    let dst = build_open62541(src_open62541, encryption_dst.as_ref(), sanitizer_flags);
 
     // Get derived paths relative to `dst`.
     let dst_include = dst.join(CMAKE_INCLUDE);
@@ -152,6 +175,8 @@ fn main() {
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
     // link in addition to the base `open62541` library.
     cc::Build::new()
+        // enable address sanitizer if requested
+        .flags(sanitizer_flags)
         .file(out_extern_c)
         .file(src_wrapper_c)
         .include(dst_include)
@@ -209,7 +234,7 @@ impl EncryptionDst {
     }
 }
 
-fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
+fn prepare_mbedtls(src: PathBuf, sanitizer_flags: &[&str]) -> EncryptionDst {
     // Build bundled copy of `mbedtls` with CMake.
     let mut cmake = cmake::Config::new(src);
     cmake
@@ -223,6 +248,11 @@ fn prepare_mbedtls(src: PathBuf) -> EncryptionDst {
         .define("ENABLE_PROGRAMS", "OFF")
         // Skip building test programs that we are not going to run anyway.
         .define("ENABLE_TESTING", "OFF");
+
+    // enable address sanitizer if requested
+    for flag in sanitizer_flags {
+        cmake.cflag(flag).cxxflag(flag);
+    }
 
     // Disable warnings as errors.
     //
@@ -259,7 +289,11 @@ fn prepare_openssl() -> EncryptionDst {
     EncryptionDst::OpenSsl { search, libs }
 }
 
-fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf {
+fn build_open62541(
+    src: PathBuf,
+    encryption: Option<&EncryptionDst>,
+    sanitizer_flags: &[&str],
+) -> PathBuf {
     // Build bundled copy of `open62541` with CMake.
     let mut cmake = cmake::Config::new(src);
     cmake
@@ -281,6 +315,12 @@ fn build_open62541(src: PathBuf, encryption: Option<&EncryptionDst>) -> PathBuf 
         // happen when the tool `nodeset_compiler` is called. When we package a crate, builds should
         // never modify files outside of `OUT_DIR`, so we disable the cache to prevent this.
         .env("PYTHONDONTWRITEBYTECODE", "1");
+
+    // Unlike `UA_ENABLE_DEBUG_SANITIZER` above, this adds only the sanitizers that are enabled in
+    // the Rust build (and whose runtime is thus linked).
+    for flag in sanitizer_flags {
+        cmake.cflag(flag).cxxflag(flag);
+    }
 
     if matches!(env::var("CARGO_CFG_TARGET_ENV"), Ok(env) if env == "musl") {
         let arch = env::var("CARGO_CFG_TARGET_ARCH").expect("should have CARGO_CFG_TARGET_ARCH");

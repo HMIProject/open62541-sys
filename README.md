@@ -26,3 +26,33 @@ Make sure to check out the repository `open62541-sys` with submodules:
 ```shell
 git submodule update --init --recursive
 ```
+
+### Address sanitizer
+
+When the Rust code is built with AddressSanitizer enabled (nightly `-Zsanitizer=address`), the bundled C
+libraries are instrumented as well (with `-fsanitize=address -fno-omit-frame-pointer`). No other
+configuration is necessary:
+
+```sh
+RUSTFLAGS="-Zsanitizer=address" cargo +nightly test \
+--target "$(rustc +nightly -vV | sed -n 's/^host: //p')"
+```
+
+The sanitizer runtime is provided by the LLVM version bundled with Rust, so the C compiler must be
+compatible with it. Otherwise, linking fails with an undefined symbol like this one (seen with the
+default Apple Clang on macOS):
+
+```text
+Undefined symbols for architecture arm64:
+"___asan_version_mismatch_check_apple_clang_2100", referenced from: ...
+```
+
+To resolve this, select a Clang matching the LLVM major version that `rustc +nightly -vV` reports
+(line `LLVM version`) by setting `CC` (or `CC_<target>`, as supported by the
+[`cc`](https://docs.rs/cc) crate). For example, with LLVM from Homebrew on macOS:
+
+```sh
+CC="$(brew --prefix llvm)/bin/clang" RUSTFLAGS="-Zsanitizer=address" cargo +nightly test \
+--target "$(rustc +nightly -vV | sed -n 's/^host: //p')"
+```
+
