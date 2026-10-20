@@ -14,6 +14,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Upgrade to Mbed TLS version [3.6.7](https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.6.7).
+
 ## [0.6.4] - 2026-10-09
 
 - Upgrade to open62541 version [1.5.9](https://github.com/open62541/open62541/releases/tag/v1.5.9).
