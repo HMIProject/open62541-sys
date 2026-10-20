@@ -31,6 +31,7 @@ const ASAN_FLAGS: &[&str] = &["-fsanitize=address", "-fno-omit-frame-pointer"];
 /// fails with an unresolved `__asan_version_mismatch_check_*` symbol. We deliberately do not disable
 /// this check; see `README.md` for how to select a matching C compiler instead.
 fn sanitizer_flags() -> &'static [&'static str] {
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_SANITIZE");
     let sanitize = env::var("CARGO_CFG_SANITIZE").unwrap_or_default();
     if sanitize.split(',').any(|sanitizer| sanitizer == "address") {
         ASAN_FLAGS
