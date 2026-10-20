@@ -29,9 +29,9 @@ git submodule update --init --recursive
 
 ### Address sanitizer
 
-When the Rust code is built with AddressSanitizer enabled (nightly `-Zsanitizer=address`), the bundled C
-libraries are instrumented as well (with `-fsanitize=address -fno-omit-frame-pointer`). No other
-configuration is necessary:
+When the Rust code is built with AddressSanitizer enabled (nightly `-Zsanitizer=address`), the
+bundled C libraries are instrumented as well (with `-fsanitize=address -fno-omit-frame-pointer`). No
+other configuration is necessary:
 
 ```sh
 RUSTFLAGS="-Zsanitizer=address" cargo +nightly test \
@@ -55,4 +55,3 @@ To resolve this, select a Clang matching the LLVM major version that `rustc +nig
 CC="$(brew --prefix llvm)/bin/clang" RUSTFLAGS="-Zsanitizer=address" cargo +nightly test \
 --target "$(rustc +nightly -vV | sed -n 's/^host: //p')"
 ```
-
