@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Instrument bundled C libraries with AddressSanitizer when the Rust code is built with
+  `-Zsanitizer=address`. See `README.md` for selecting a compatible C compiler.
+
 ### Changed
 
 ## [0.6.4] - 2026-10-09
