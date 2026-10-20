@@ -176,7 +176,7 @@ fn main() {
     // Build `extern.c` and our custom `wrapper.c` that both hold additional helpers that we want to
     // link in addition to the base `open62541` library.
     cc::Build::new()
-        // enable address sanitizer if requested
+        // Enable address sanitizer if requested.
         .flags(sanitizer_flags)
         .file(out_extern_c)
         .file(src_wrapper_c)
@@ -250,7 +250,7 @@ fn prepare_mbedtls(src: PathBuf, sanitizer_flags: &[&str]) -> EncryptionDst {
         // Skip building test programs that we are not going to run anyway.
         .define("ENABLE_TESTING", "OFF");
 
-    // enable address sanitizer if requested
+    // Enable address sanitizer if requested.
     for flag in sanitizer_flags {
         cmake.cflag(flag).cxxflag(flag);
     }
