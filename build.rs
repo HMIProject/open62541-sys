@@ -334,12 +334,6 @@ fn build_open62541(
         // Explicitly set C11 standard to force Windows variants of `vsnprintf()` to conform to this
         // standard. This also matches the expected (or supported) C standard of `open62541` itself.
         .define("C_STANDARD", "11")
-        // `open62541` appends `-std=c99` to `CMAKE_C_FLAGS`, which overrides the above. Newer
-        // toolchains (Ubuntu 26.04) then fail with "unknown type name 'atomic_uintptr_t'", because
-        // `<stdatomic.h>` is only usable in C11 mode. CMake puts the flag for `CMAKE_C_STANDARD`
-        // after `CMAKE_C_FLAGS`, so this one wins.
-        .define("CMAKE_C_STANDARD", "11")
-        .define("CMAKE_C_EXTENSIONS", "OFF")
         // Override default value `ON` of `UA_ENABLE_DEBUG_SANITIZER`.
         // When the build type is Debug (which is what Cargo uses for test/debug builds) on UNIX with Clang,
         // it automatically appends -fsanitize=address,undefined -fno-omit-frame-pointer to all C compiler flags.
