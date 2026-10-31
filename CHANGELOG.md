@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix build on Ubuntu 26.04.
+
 ## [0.6.5] - 2026-10-21
 
 ### Added
