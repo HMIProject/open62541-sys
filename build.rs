@@ -255,6 +255,15 @@ fn prepare_mbedtls(src: PathBuf, sanitizer_flags: &[&str]) -> EncryptionDst {
         cmake.cflag(flag).cxxflag(flag);
     }
 
+    // Free the frame pointer register on 32-bit ARM.
+    //
+    // Unoptimized (debug) builds with recent GCC keep a frame pointer, leaving too few registers
+    // for the inline assembly in `bn_mul.h`: "'asm' operand has impossible constraints".
+    // <https://github.com/Mbed-TLS/mbedtls/issues/9875>
+    if matches!(env::var("CARGO_CFG_TARGET_ARCH"), Ok(arch) if arch == "arm") {
+        cmake.cflag("-fomit-frame-pointer");
+    }
+
     // Disable warnings as errors.
     //
     // On macOS builds use `-mmacosx-version-min` and `--target` options that sometimes cause a
