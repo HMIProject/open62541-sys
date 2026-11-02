@@ -209,10 +209,6 @@ fn main() {
         .include(dst_include)
         // Disable warnings for `open62541`. Not much we can do anyway.
         .warnings(false)
-        // Explicitly disable deprecation warnings (seem to be enabled even when other warnings have
-        // been disabled above).
-        .flag_if_supported("-Wno-deprecated-declarations")
-        .flag_if_supported("-Wno-deprecated")
         .compile(LIB_EXT);
 }
 
@@ -303,13 +299,7 @@ fn prepare_mbedtls(src: PathBuf, sanitizer_flags: &[&str]) -> EncryptionDst {
 
     // The set of MbedTLS libraries that must be linked to work with `open62541` has been taken from
     // <https://github.com/open62541/open62541/blob/master/tools/cmake/FindMbedTLS.cmake>.
-    let mut libs = vec!["mbedtls", "mbedx509", "mbedcrypto"];
-
-    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "windows") {
-        // For some reason, newer Rust versions (?) require an explicit import of `bcrypt.lib` while
-        // older Rust versions (?) seem fine without this import. Add it regardless.
-        libs.push("bcrypt");
-    }
+    let libs = vec!["mbedtls", "mbedx509", "mbedcrypto"];
 
     EncryptionDst::MbedTls { dst, libs }
 }
