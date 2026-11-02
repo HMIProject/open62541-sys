@@ -118,6 +118,25 @@ fn main() {
     let out_bindings_rs = out.join("bindings.rs");
     let out_extern_c = out.join("extern.c");
 
+    // Provide a minimal `<stdatomic.h>` for `libclang`. On some systems (Ubuntu 26.04) `libclang`
+    // does not pick up a usable system header, even though `__has_include(<stdatomic.h>)` is true,
+    // which breaks the inline helpers in `config.h` ("unknown type name 'atomic_uintptr_t'"). The
+    // shim only covers what `open62541` uses and is only seen by `bindgen`, not by the C compiler.
+    let shim_dir = out.join("bindgen-shim");
+    fs::create_dir_all(&shim_dir).expect("should create bindgen shim directory");
+    fs::write(
+        shim_dir.join("stdatomic.h"),
+        "#ifndef RS_STDATOMIC_SHIM_H\n\
+         #define RS_STDATOMIC_SHIM_H\n\
+         typedef _Atomic(__UINTPTR_TYPE__) atomic_uintptr_t;\n\
+         #define atomic_load(o) __c11_atomic_load(o, __ATOMIC_SEQ_CST)\n\
+         #define atomic_exchange(o, v) __c11_atomic_exchange(o, v, __ATOMIC_SEQ_CST)\n\
+         #define atomic_compare_exchange_strong(o, e, d) \\\n\
+         \x20   __c11_atomic_compare_exchange_strong(o, e, d, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)\n\
+         #endif\n",
+    )
+    .expect("should write stdatomic.h shim for bindgen");
+
     let builder = bindgen::Builder::default()
         // Include our wrapper functions.
         .allowlist_function("(__)?RS_.*")
@@ -133,6 +152,7 @@ fn main() {
         // `vsnprintf()` to conform to the standard (as it is a superset of C99).
         .clang_arg("-std=c11")
         .clang_arg(format!("-I{}", dst_include.display()))
+        .clang_arg(format!("-I{}", shim_dir.display()))
         .default_enum_style(bindgen::EnumVariation::NewType {
             is_bitfield: false,
             is_global: false,
@@ -253,6 +273,15 @@ fn prepare_mbedtls(src: PathBuf, sanitizer_flags: &[&str]) -> EncryptionDst {
     // Enable address sanitizer if requested.
     for flag in sanitizer_flags {
         cmake.cflag(flag).cxxflag(flag);
+    }
+
+    // Free the frame pointer register on 32-bit ARM.
+    //
+    // Unoptimized (debug) builds with recent GCC keep a frame pointer, leaving too few registers
+    // for the inline assembly in `bn_mul.h`: "'asm' operand has impossible constraints".
+    // <https://github.com/Mbed-TLS/mbedtls/issues/9875>
+    if matches!(env::var("CARGO_CFG_TARGET_ARCH"), Ok(arch) if arch == "arm") {
+        cmake.cflag("-fomit-frame-pointer");
     }
 
     // Disable warnings as errors.
