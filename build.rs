@@ -90,6 +90,12 @@ fn main() {
     println!("cargo:rustc-link-search={}", dst_lib.display());
     println!("cargo:rustc-link-lib={LIB_BASE}");
 
+    if matches!(env::var("CARGO_CFG_TARGET_OS"), Ok(os) if os == "windows") {
+        // `UA_random_secureBytes()` uses `BCryptGenRandom()` on Windows, regardless of whether
+        // encryption is enabled.
+        println!("cargo:rustc-link-lib=bcrypt");
+    }
+
     // For encryption support enabled, we add the libraries that have to be used as dependencies for
     // the final build artifact.
     //
