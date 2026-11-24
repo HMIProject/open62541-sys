@@ -9,8 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Build `bindgen` without its `prettyplease` feature. The bindings are formatted with `rustfmt`,
-  as before, so they do not change.
+- Build `bindgen` without its `prettyplease` feature. The bindings are formatted with `rustfmt`, as
+  before, so they do not change.
 
 ## [0.6.6] - 2026-11-02
 
