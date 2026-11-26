@@ -9,7 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Build `bindgen` without its `prettyplease` feature to prevent version conflicts between `syn` v2 and v3.
+- Build `bindgen` without its `prettyplease` feature to prevent version conflicts between `syn` v2
+  and v3.
 
 ## [0.6.6] - 2026-11-02
 
